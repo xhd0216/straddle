@@ -6,18 +6,25 @@ s = 'https://finance.yahoo.com/calendar/earnings'
 
 
 class earning():
-  def __init__(self):
+  def __init__(self, misc=None):
     self.data = dict()
+    if isinstance(misc, dict):
+      for i in misc.keys():
+        self.data[i] = misc[i]
   def setSymbol(self, symbol):
     if isinstance(symbol, str):
       self.data['symbol'] = symbol
   def setEPS(self, eps):
-      try:
-        a = float(eps)
-      except:
-        self.data['eps'] = None
-        return
-      self.data['eps'] = a
+    try:
+      a = float(eps)
+    except:
+      self.data['eps'] = None
+      return
+    self.data['eps'] = a
+  def setAttr(self, key, value):
+    if not isinstance(key, str):
+      return
+    self.data[key] = value
   def __json__(self):
     return json.dumps(self.data)
     
