@@ -11,6 +11,41 @@ class earning():
     if isinstance(misc, dict):
       for i in misc.keys():
         self.data[i] = misc[i]
+  def isValid(self):
+    fields = {'symbol':str, 'eps':float}
+    for k in fields.keys():
+      if k not in self.data or self.data[k] == None:
+        print "key %s is missing" % k
+        return False
+      if not isinstance(self.data[k], fields[k]):
+        # try to fix it
+        a = self.data[k]
+        t = fields[k]
+        if t == str:
+          try:
+            a = str(a)
+            self.data[k] = a
+          except:
+            print "data format error: %s is not a string" % k
+            return False
+        elif t == int:
+          try:
+            a = float(a)
+            a = int(a)
+            self.data[k] = a
+          except:
+            print "data format error: %s is not an integer" % k
+            return False
+        elif t == float:
+          try:
+            a = float(a)
+            self.data[k] = a
+          except:
+            print "data format error: %s is not a float" % k
+            return False
+        else:
+          return False
+    return True
   def setSymbol(self, symbol):
     if isinstance(symbol, str):
       self.data['symbol'] = symbol
