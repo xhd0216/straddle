@@ -1,4 +1,4 @@
-import objects
+from objects import objects
 
 class testObjects(objects):
   def __init__(self):
@@ -6,6 +6,7 @@ class testObjects(objects):
     self.addRequiredField('str_field', str)
     self.addRequiredField('int_field', int)
     self.addRequiredField('float_field', float)
+
 def test_inherit_objects():
   t = testObjects()
   assert t.addKey('str_field', 1)

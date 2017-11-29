@@ -39,7 +39,7 @@ class objects():
     if not isinstance(k, str):
       # invalid key
       return False
-    if k not in self.fields
+    if k not in self.fields:
       # this key is not required
       return k in self.data
     if k not in self.data or self.data[k] == None:
