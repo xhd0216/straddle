@@ -9,3 +9,5 @@ test:
 	$(binpath)/pytest
 clean:
 	rm -rf $(vepath)
+	find . -name "*.pyc" | xargs rm
+	rm -rf __pycache__
