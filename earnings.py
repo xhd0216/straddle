@@ -1,51 +1,20 @@
 import urllib2
 from HTMLParser import *
 import json
+from objects import objects
 
 s = 'https://finance.yahoo.com/calendar/earnings'
 
 
-class earning():
+class earning(objects):
   def __init__(self, misc=None):
-    self.data = dict()
+    objects.__init__(self)
+    self.addRequiredField('symbol', str)
+    # eps is not required, could be '-'
+    # self.addRequiredField('eps', float)
     if isinstance(misc, dict):
       for i in misc.keys():
         self.data[i] = misc[i]
-  def isValid(self):
-    fields = {'symbol':str, 'eps':float}
-    for k in fields.keys():
-      if k not in self.data or self.data[k] == None:
-        print "key %s is missing" % k
-        return False
-      if not isinstance(self.data[k], fields[k]):
-        # try to fix it
-        a = self.data[k]
-        t = fields[k]
-        if t == str:
-          try:
-            a = str(a)
-            self.data[k] = a
-          except:
-            print "data format error: %s is not a string" % k
-            return False
-        elif t == int:
-          try:
-            a = float(a)
-            a = int(a)
-            self.data[k] = a
-          except:
-            print "data format error: %s is not an integer" % k
-            return False
-        elif t == float:
-          try:
-            a = float(a)
-            self.data[k] = a
-          except:
-            print "data format error: %s is not a float" % k
-            return False
-        else:
-          return False
-    return True
   def setSymbol(self, symbol):
     if isinstance(symbol, str):
       self.data['symbol'] = symbol
@@ -56,13 +25,7 @@ class earning():
       self.data['eps'] = None
       return
     self.data['eps'] = a
-  def setAttr(self, key, value):
-    if not isinstance(key, str):
-      return
-    self.data[key] = value
-  def __json__(self):
-    return json.dumps(self.data)
-    
+
 class earningParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)

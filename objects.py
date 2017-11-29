@@ -1,3 +1,5 @@
+import json
+
 def fix_instance(a, t):
   # if a is not an instance of t, try to fix it
   # return (ok, a) 
@@ -34,6 +36,10 @@ class objects():
   def __init__(self):
     self.fields = dict()
     self.data = dict()
+  def __json__(self):
+    if not self.isValid():
+      return ''
+    return json.dumps(self.data, sort_keys=True)
   def __validate__(self, k):
     # validate single key
     if not isinstance(k, str):
