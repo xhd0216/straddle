@@ -25,6 +25,10 @@ class earning(objects):
       self.data['eps'] = None
       return
     self.data['eps'] = a
+  def getSymbol(self):
+    if self.isValid():
+      return self.data['symbol']
+    return None
 
 class earningParser(HTMLParser):
   def __init__(self):
@@ -55,8 +59,10 @@ class earningParser(HTMLParser):
       self.e = None
       self.meet_eps = False
   def __json__(self):
+    self.data.sort(key=lambda e: e.getSymbol())
     js = '{\"data\":[' + ','.join([i.__json__() for i in self.data]) + ']}'
     return js
+"""
 a = urllib2.urlopen(s)
 b = a.read()
 j = earningParser()
@@ -64,3 +70,4 @@ j.feed(b)
 for i in j.data:
   print i.__json__()
 print j.__json__()
+"""
