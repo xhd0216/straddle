@@ -11,7 +11,7 @@ test:
 clean:
 	rm -rf $(vepath)
 	find . -name "*.pyc" | xargs rm
-	rm -rf __pycache__
+	rm -rf test/__pycache__
 	rm -f MANIFEST
-	rm -rf Straddle.egg-info/
+	rm -rf *.egg-info/
 	rm -rf dist/
