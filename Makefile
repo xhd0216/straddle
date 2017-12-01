@@ -1,3 +1,4 @@
+.PHONY: test
 vepath = ./ve
 binpath = $(vepath)/bin
 
