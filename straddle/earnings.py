@@ -3,7 +3,7 @@ from HTMLParser import *
 import json
 from objects import objects
 
-s = 'https://finance.yahoo.com/calendar/earnings'
+yahoo_earning_url = 'https://finance.yahoo.com/calendar/earnings'
 
 
 class earning(objects):
@@ -62,12 +62,3 @@ class earningParser(HTMLParser):
     self.data.sort(key=lambda e: e.getSymbol())
     js = '{\"data\":[' + ','.join([i.__json__() for i in self.data]) + ']}'
     return js
-"""
-a = urllib2.urlopen(s)
-b = a.read()
-j = earningParser()
-j.feed(b)
-for i in j.data:
-  print i.__json__()
-print j.__json__()
-"""
