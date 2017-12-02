@@ -1,5 +1,5 @@
 .PHONY: test
-vepath = ./ve
+vepath = ./venv
 binpath = $(vepath)/bin
 
 

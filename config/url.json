@@ -1,0 +1,9 @@
+{
+  "earning":{
+    "url":"https://biz.yahoo.com/research/earncal"
+  },
+  "options":{
+    "url":"https://finance.yahoo.com/quote/%s/options",
+    "paras":["symbol"]
+  }
+}

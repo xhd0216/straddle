@@ -83,10 +83,14 @@ class objects():
         val = a
     self.data[key] = val
     return True
-  def addRequiredField(self, key, tp):
+  def addRequiredField(self, key, tp, force=False):
     if not isinstance(key, str):
       return False
     if not isinstance(tp, type):
       return False
+    if key in self.fields:
+      # field already set
+      if force != True:
+        return False
     self.fields[key] = tp
     return True

@@ -1,8 +1,3 @@
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-
 from straddle.objects import objects
 
 class testObjects(objects):
@@ -37,3 +32,13 @@ def test_wrong_key_types():
   assert t.isValid() == False
   assert t.addKey('float_field', '3e6')
   assert t.addKey('int_field', '4e') == False
+
+def test_add_required_field():
+  t = testObjects()
+  assert not t.addRequiredField('str_field', str)
+  assert t.addKey('str_field', 'correct key')
+  assert not t.addRequiredField('str_field', int)
+  assert t.getKey('str_field')
+  assert t.addRequiredField('str_field', int, True)
+  assert not t.getKey('str_field')
+  
