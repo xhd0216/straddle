@@ -1,4 +1,7 @@
 {
+  "testing":{
+    "url":"https://example.org/this_page_means_nothing.html"
+  }
   "earning":{
     "url":"https://biz.yahoo.com/research/earncal"
   },
