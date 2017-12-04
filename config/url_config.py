@@ -69,7 +69,3 @@ class URLDB(objects):
     if not d:
       return None
     return d.getURL()
-
-u = URLDB()
-print u.getItem('testing')
-print u.getURL('testing')
