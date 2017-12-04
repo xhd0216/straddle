@@ -1,0 +1,12 @@
+config module: reads a json file.
+json file format: each level 1's value is a dictionary
+
+{
+  "item1":{
+    "param1":"value1",
+    "param2":"value2"
+  },
+  "item2":{
+    "param1":"value3"
+  }
+}
