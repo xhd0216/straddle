@@ -11,7 +11,7 @@ test:
 clean:
 	rm -rf $(vepath)
 	find . -name "*.pyc" | xargs rm
-	rm -rf test/__pycache__
+	find . -name "__pycache__" | xargs rm -rf
 	rm -f MANIFEST
 	rm -rf *.egg-info/
 	rm -rf dist/
