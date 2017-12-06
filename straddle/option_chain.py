@@ -1,14 +1,55 @@
 import os
 import json
 import urllib2
-import HTMLParser
+from HTMLParser import *
 import datetime, time
 from straddle.objects import objects
 from config.url_config import URLDB
 from straddle.earnings import *
 
 option_date_format = '%B %d, %Y'
+starting_page = 'https://finance.yahoo.com/quote/%s/options?straddle=true'
 
+def find_matching(s, b, forward=True):
+  if forward:
+    if b == '{':
+      c = '}'
+    elif b == '[':
+      c = ']'
+    elif b == '(':
+      c = ')'
+    else:
+      return -1
+  else:
+    return -1
+  """
+  else:
+    if b == '}':
+      c = '{'
+    elif b == '}':
+      c = '['
+    elif b == ')':
+      c = '('
+  """
+  i = s.find(b) + 1
+  n = 1
+  while i < len(s):
+    if s[i] == b:
+      n += 1
+    elif s[i] == c:
+      n -= 1
+    if n == 0:
+      return i
+    i += 1
+  return -1
+
+def print_struct(js, key, prefix=''):
+  if not isinstance(js, dict):
+    return
+  for i in js.keys():
+    ps = prefix + '/' + i
+    print ps
+    print_struct(js[i], key, ps)
 def date_to_second(s, fm=option_date_format):
   try:
     d = datatime.datetime.strptime(s, fm)
@@ -53,3 +94,16 @@ def GetOptionChainPage():
   return
     
     
+def getOptionJson():
+  f = urllib2.urlopen(starting_page % 'DE')
+  print f.getcode()
+  g = f.read()
+  f.close()
+
+  r=g.find('root.App.main')
+  g1 = g[r:]
+  left = g1.find('{')
+  g1 = g1[left:]
+  right = find_matching(g1, '{')
+  j = json.loads(g1[:right+1])
+  print_struct(j, '')
