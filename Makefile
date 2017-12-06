@@ -1,10 +1,12 @@
-.PHONY: test
+.PHONY: test clean install
 vepath = ./venv
 binpath = $(vepath)/bin
 
+install:
+	python setup.py install
 
-test:
-	test -d $(vepath) || virtualenv $(vepath) 
+test: 
+	test -d $(vepath) || virtualenv $(vepath)
 	. $(vepath)/bin/activate
 	$(binpath)/pip install pytest
 	$(binpath)/pytest
@@ -15,3 +17,4 @@ clean:
 	rm -f MANIFEST
 	rm -rf *.egg-info/
 	rm -rf dist/
+	rm -rf build/

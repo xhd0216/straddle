@@ -1,37 +1,29 @@
+import sys
 import os
 import json
 import urllib2
 from HTMLParser import *
 import datetime, time
-from straddle.objects import objects
+from objects import objects
 from config.url_config import URLDB
-from straddle.earnings import *
+from earnings import *
 
 option_date_format = '%B %d, %Y'
 starting_page = 'https://finance.yahoo.com/quote/%s/options?straddle=true'
 
 def find_matching(s, b, forward=True):
-  if forward:
-    if b == '{':
-      c = '}'
-    elif b == '[':
-      c = ']'
-    elif b == '(':
-      c = ')'
-    else:
-      return -1
+  if b == '{':
+    c = '}'
+  elif b == '[':
+    c = ']'
+  elif b == '(':
+    c = ')'
   else:
     return -1
-  """
-  else:
-    if b == '}':
-      c = '{'
-    elif b == '}':
-      c = '['
-    elif b == ')':
-      c = '('
-  """
   i = s.find(b) + 1
+  if i == 0:
+    # cannot find {
+    return -1
   n = 1
   while i < len(s):
     if s[i] == b:
@@ -50,6 +42,7 @@ def print_struct(js, key, prefix=''):
     ps = prefix + '/' + i
     print ps
     print_struct(js[i], key, ps)
+
 def date_to_second(s, fm=option_date_format):
   try:
     d = datatime.datetime.strptime(s, fm)
@@ -69,9 +62,11 @@ class optionParser(HTMLParser):
     return None
 def GetOptionChainPage():
   udb = URLDB()
-  earning_url = udb.getItem('earning')
-  options_url = udb.getItem('options')
-  if url == None:
+  earning_url = udb.getItem('earning').getURL()
+  options_url = udb.getItem('options').getURL()
+  print earning_url
+  print options_url
+  if earning_url == None:
     print 'failed to get url for earning'
     return 
   try:
@@ -83,19 +78,15 @@ def GetOptionChainPage():
     return
   p = earningParser()
   p.feed(g)
-  for i in p.data:
+  for i in p.data[:1]:
     # assert isinstance(i, earning)
     u = options_url % i.getSymbol()
-    f = urllib2.urlopen(u)
-    if f == None:
-      print 'failed to open ', u
-    g = f.read()
-    # place a parser here
+    print u
   return
+GetOptionChainPage()    
     
-    
-def getOptionJson():
-  f = urllib2.urlopen(starting_page % 'DE')
+def getOptionJson(symbol):
+  f = urllib2.urlopen(starting_page % 'symbol')
   print f.getcode()
   g = f.read()
   f.close()

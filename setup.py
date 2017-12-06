@@ -6,4 +6,7 @@ setup(
     author_email='xhd0216@gmail.com',
     url='https://github.com/xhd0216/straddle',
     packages=find_packages(),
+    package_data={
+      '':['*.json', '*.html']
+    }
 )
