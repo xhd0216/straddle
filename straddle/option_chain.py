@@ -55,25 +55,41 @@ def date_to_second(s, fm=option_date_format):
 class optionParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
-  def hasAttr(self, attrs, key):
+    self.expd = False
+  def getAttr(self, attrs, key):
     for x in attrs:
       if key == x[0]:
         return x[1]
     return None
+  def handle_starttag(self, tag, attrs):
+    if tag == 'select':
+      print attrs
+      a = self.getAttr(attrs, 'class')
+      if a != None and a == 'Fz(s)':
+        self.expd = True
+    if tag == 'option' and self.expd:
+      b = self.getAttr(attr, 'value')
+      if b != None:
+        print b
+  def handle_data(self, data):
+    if self.expd:
+      print data
+  def hadnle_endtag(self, tag):
+    if tag == 'select' and self.expd:
+      self.expd = False
 def getOptionJson(symbol):
-  f = urllib2.urlopen(starting_page % 'symbol')
+  f = urllib2.urlopen(starting_page % symbol)
   # print f.getcode()
   g = f.read()
   f.close()
-
   r=g.find('root.App.main')
   g1 = g[r:]
   left = g1.find('{')
   g1 = g1[left:]
   right = find_matching(g1, '{')
   j = json.loads(g1[:right+1])
-  #print json.dumps(j, indent=2)
-  print_struct(j, '')
+  #print json.dumps(j, indent=3)
+  #print_struct(j, '')
 def GetOptionChainPage():
   udb = URLDB()
   earning_url = udb.getItem('earning').getURL()
@@ -92,11 +108,16 @@ def GetOptionChainPage():
     return
   p = earningParser()
   p.feed(g)
-  for i in p.data[:1]:
+  for i in p.data:
     # assert isinstance(i, earning)
     u = options_url % i.getSymbol()
     # print u
-    getOptionJson(i.getSymbol())
+    # getOptionJson(i.getSymbol())
+    h = urllib2.urlopen(u)
+    k = h.read()
+    print u, h.getcode(), len(k), 'select' in k
+    h.close()
+    o = optionParser()
+    o.feed(k)
   return
-GetOptionChainPage()    
-    
+GetOptionChainPage() 
