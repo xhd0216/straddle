@@ -1,7 +1,7 @@
 from HTMLParser import *
 import urllib2
 
-s = 'http://www.nasdaq.com/symbol/de/option-chain'
+s = 'http://www.nasdaq.com/symbol/%s/option-chain'
 
 class nasdaqParser(HTMLParser):
   def __init__(self):
@@ -11,9 +11,11 @@ class nasdaqParser(HTMLParser):
     self.entry = None
     self.seen_table = False
     self.headers = []
+    self.header_names = []
     self.counter = 0
     self.table = False
     self.td = False
+    self.data = []
   def handle_starttag(self, tag, attrs):
     if tag == 'table':
       self.counter = 0
@@ -37,7 +39,8 @@ class nasdaqParser(HTMLParser):
       self.seen_th = False
     if tag == 'tr':
       self.row_begin = False
-      print self.entry
+      #print self.entry
+      self.data.append(self.entry)
     if tag == 'table':
       self.seen_table = False
     if tag == 'td':
@@ -48,22 +51,42 @@ class nasdaqParser(HTMLParser):
         self.seen_table = True
       if 'Puts' in data:
         self.headers.append(self.counter)
+        self.header_names.append('puts')
       elif 'Calls' in data:
         self.headers.append(self.counter)
+        self.header_names.append('calls')
       elif 'Bid' in data:
         self.headers.append(self.counter)
+        self.header_names.append('bid')
       elif 'Ask' in data:
         self.headers.append(self.counter)
+        self.header_names.append('ask')
       elif 'Strike' in data:
         self.headers.append(self.counter)
+        self.header_names.append(strike)
     if self.row_begin:
       if self.counter in self.headers and self.td:
         ##print self.counter, data
         self.entry.append(data)
-  
-f = urllib2.urlopen(s)
+  def __json__(self):
+    js = '{\"data\":['
+    for t in range(len(self.data)):
+      i = self.data(t)
+      js += '{' 
+      for j in range(len(i)):
+        js += '\"' + self.header_names[j] + '\":' + str(i[j])
+        if j != len(i) - 1:
+          js += ','
+      js += '}'
+      if t != len(self.data) - 1:
+        js += ','
+    js += ']}'
+    return js
+"""
+f = urllib2.urlopen(s % 'de')
 g = f.read()
 f.close()
 
 p = nasdaqParser()
 p.feed(g)    
+"""

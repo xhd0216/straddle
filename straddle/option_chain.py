@@ -56,6 +56,8 @@ class optionParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
     self.expd = False
+    self.item = []
+    self.data = []
   def getAttr(self, attrs, key):
     for x in attrs:
       if key == x[0]:
