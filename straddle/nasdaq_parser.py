@@ -71,7 +71,7 @@ class nasdaqParser(HTMLParser):
   def __json__(self):
     js = '{\"data\":['
     for t in range(len(self.data)):
-      i = self.data(t)
+      i = self.data[t]
       js += '{' 
       for j in range(len(i)):
         js += '\"' + self.header_names[j] + '\":' + str(i[j])
