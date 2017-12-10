@@ -2,7 +2,8 @@ from HTMLParser import *
 import urllib2
 
 s = 'http://www.nasdaq.com/symbol/%s/option-chain'
-
+headers = ["Calls", "Last", " Chg", "Bid", "Ask", "Vol", "OpenInt", "Root", "Strike", "Puts", "Last", "Chg", "Bid", "Ask", "Vol", "OpenInt"]
+n = len(headers)
 class nasdaqParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -16,65 +17,75 @@ class nasdaqParser(HTMLParser):
     self.table = False
     self.td = False
     self.data = []
+    self.call = None
   def handle_starttag(self, tag, attrs):
     if tag == 'table':
-      self.counter = 0
-      self.headers = []
       self.table = True
     if tag == 'th':
       self.seen_th = True
-      self.counter += 1
     if tag == 'tr' and self.seen_table:
-      self.counter = 0
+      self.counter = -1
       self.row_begin = True
-      self.entry = []
+      if self.seen_table:
+        self.entry = ['-']*n
     if tag == 'td':
       self.td = True
       self.counter += 1
   def handle_endtag(self, tag):
     if tag == 'table':
-      print 'headers', self.headers
       self.table = False
+      self.seen_table = False
     if tag == 'th':
       self.seen_th = False
     if tag == 'tr':
       self.row_begin = False
       #print self.entry
-      self.data.append(self.entry)
-    if tag == 'table':
-      self.seen_table = False
+      if self.entry != None:
+        self.data.append(self.entry)
     if tag == 'td':
       self.td = False
   def handle_data(self, data):
     if self.seen_th:
-      if 'Root' in data:
+      h = data.split()
+      if len(h) > 1:
+        return
+      if 'Root' in h:
         self.seen_table = True
-      if 'Puts' in data:
+      """
+      if 'Puts' in h:
         self.headers.append(self.counter)
         self.header_names.append('puts')
-      elif 'Calls' in data:
+        self.call = False
+      elif 'Calls' in h:
         self.headers.append(self.counter)
         self.header_names.append('calls')
-      elif 'Bid' in data:
+        self.call = True
+      elif 'Bid' in h:
         self.headers.append(self.counter)
-        self.header_names.append('bid')
-      elif 'Ask' in data:
+        if self.call:
+          self.header_names.append('call_bid')
+        else:
+          self.header_names.append('put_bid')
+      elif 'Ask' in h:
         self.headers.append(self.counter)
-        self.header_names.append('ask')
-      elif 'Strike' in data:
+        if self.call:
+          self.header_names.append('call_ask')
+        else:
+          self.header_names.append('put_ask')
+      elif 'Strike' in h:
         self.headers.append(self.counter)
-        self.header_names.append(strike)
-    if self.row_begin:
-      if self.counter in self.headers and self.td:
-        ##print self.counter, data
-        self.entry.append(data)
+        self.header_names.append('strike')
+      """
+    if self.row_begin and self.seen_table:
+      if self.td:
+        self.entry[self.counter] = data
   def __json__(self):
     js = '{\"data\":['
     for t in range(len(self.data)):
       i = self.data[t]
       js += '{' 
       for j in range(len(i)):
-        js += '\"' + self.header_names[j] + '\":' + str(i[j])
+        js += '\"' + headers[j] + '\":' + '\"' + str(i[j]) + '\"'
         if j != len(i) - 1:
           js += ','
       js += '}'
@@ -82,11 +93,11 @@ class nasdaqParser(HTMLParser):
         js += ','
     js += ']}'
     return js
-"""
 f = urllib2.urlopen(s % 'de')
 g = f.read()
 f.close()
 
 p = nasdaqParser()
 p.feed(g)    
-"""
+print p.data
+print p.__json__()

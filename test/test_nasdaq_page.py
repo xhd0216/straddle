@@ -2,10 +2,10 @@ from straddle.nasdaq_parser import *
 import os
 
 def test_option_page():
-  f = open(os.path.join(os.path.dirname(__file__), 'yahoo_option_page.html'))
+  f = open(os.path.join(os.path.dirname(__file__), 'nasdaq_option_chain.html'))
   g = f.read()
   f.close()
-  p = nasdapParser()
+  p = nasdaqParser()
   p.feed(g)
 
 def test_nasdaq_json():
