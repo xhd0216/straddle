@@ -11,16 +11,25 @@ default_misc = None
 default_date_format = "%b %d, %Y" ## Nov 11, 2017
 default_expiration_date = datetime.strptime(default_expiration, default_date_format)
 
-class Strike():
+strike_field = {'underlying':str, 
+                'strike':float,
+                'expiration':str,
+                'call':bool}
+strike_auxiliary = {'bid':float,
+                    'ask':float,
+                    'open_int':int}
+class Strike(objects):
   def __init__(self, 
         misc=None,
         underlying=None, 
         strike=None, 
         expiration=None,  ## str
         call=None):
-    self.data = dict() 
+    objects.__init__(self)
+    self.fields = strike_field
+    self.auxiliary = strike_auxiliary
     self.error = None
-    if misc and isinstance(misc, dict):
+    if isinstance(misc, dict):
       for k in misc.keys():
         self.data[k] = misc[k]
     ## this four arguments overrides entries in misc
@@ -32,82 +41,24 @@ class Strike():
       self.data['call'] = call
     if underlying != None:
       self.data['underlying'] = underlying
-    if not self.__validate__():
-      self.data = None
-  def __validate__(self):
-    if 'strike' not in self.data:
-      self.error = "strike is none"
-      return False
-    elif not isinstance(self.data['strike'], float):
-      try:
-        self.data['strike'] = float(self.data['strike'])
-      except:
-        self.error = "strike is not float"
-        return False
-    if 'expiration' not in self.data or self.data['expiration'] == None:
-      self.error = "expiration"
-      return False
-    """
-    dt = self.data['expiration']
-    if not isinstance(dt, datetime):
-      try:
-        dt = datetime.strptime(dt, default_date_format)
-        self.data['expiration'] = dt
-      except:
-        self.error = "cannot parse expiration"
-        return False
-    """
-    if 'call' not in self.data or self.data['call'] == None:
-      self.error = "call is null"
-      return False
-    if not isinstance(self.data['call'], bool):
-      if isinstance(self.data['call'], str):
-        s = self.data['call']
-        if s.lower() == 'call' or s.lower() == 'true':
-          self.data['call'] = True
-        elif s.lower() == 'put' or s.lower() == 'false':
-          self.data['call'] = False
-        else:
-          self.error = "invalid call str"
-          return False
-      else:
-        self.error = "call is none"
-        return False
-    if 'underlying' not in self.data or self.data['underlying'] == None:
-      self.error = "underlying is missing"
-      return False
-    return True
-  def isValid(self):
-    return self.data != None
-  def __json__(self):
     if not self.isValid():
-      if self.error != None:
-        return '{\"error\": \"%s\"}' % self.error
-      else:
-        return '{\"error\": null}'
-    return json.dumps(self.data)
+      self.data = None
   def getStrike(self):
-    if self.data == None or 'strike' not in self.data or self.data['strike'] == None:
-      return None
-    return self.data['strike']
+    return self.getKey('strike')
   def isCall(self):
     if not self.data or 'call' not in self.data or self.data['call'] == None:
       return None
     return True
   def getUnderlying(self):
-    if not self.data or 'underlying' not in self.data or self.data['underlying'] == None:
-      return None
-    return self.data['underlying']
+    return self.getKey('underlying')
   def getExpirationStr(self):
-    if not self.data or 'expiration' not in self.data or self.data['expiration'] == None:
-      return None
-    return self.data['expiration']
-  def getExpirationDate(self):
+    return self.getKey('expiration')
+  def getExpirationDate(self, fm=default_date_format):
     s = self.getExpirationStr()
     if s == None:
       return None
     try:
-      dt = datetime.strptime(s, default_date_format)
+      dt = datetime.strptime(s, fm)
     except:
       self.error = "wrong date time formate"
       return None  

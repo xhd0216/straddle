@@ -1,9 +1,12 @@
 from HTMLParser import *
+from straddle.strategy import *
 import urllib2
 
 s = 'http://www.nasdaq.com/symbol/%s/option-chain'
 headers = ["Calls", "Last", " Chg", "Bid", "Ask", "Vol", "OpenInt", "Root", "Strike", "Puts", "Last", "Chg", "Bid", "Ask", "Vol", "OpenInt"]
 n = len(headers)
+
+
 class nasdaqParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -50,32 +53,8 @@ class nasdaqParser(HTMLParser):
       if len(h) > 1:
         return
       if 'Root' in h:
+        # determine if this is the right table we are looking for
         self.seen_table = True
-      """
-      if 'Puts' in h:
-        self.headers.append(self.counter)
-        self.header_names.append('puts')
-        self.call = False
-      elif 'Calls' in h:
-        self.headers.append(self.counter)
-        self.header_names.append('calls')
-        self.call = True
-      elif 'Bid' in h:
-        self.headers.append(self.counter)
-        if self.call:
-          self.header_names.append('call_bid')
-        else:
-          self.header_names.append('put_bid')
-      elif 'Ask' in h:
-        self.headers.append(self.counter)
-        if self.call:
-          self.header_names.append('call_ask')
-        else:
-          self.header_names.append('put_ask')
-      elif 'Strike' in h:
-        self.headers.append(self.counter)
-        self.header_names.append('strike')
-      """
     if self.row_begin and self.seen_table:
       if self.td:
         self.entry[self.counter] = data
@@ -93,11 +72,27 @@ class nasdaqParser(HTMLParser):
         js += ','
     js += ']}'
     return js
-f = urllib2.urlopen(s % 'de')
-g = f.read()
-f.close()
-
-p = nasdaqParser()
-p.feed(g)    
-print p.data
-print p.__json__()
+  def getData(self):
+    return self.data
+def get_strike_list(symbol):
+  f = urllib2.urlopen(s % symbol)
+  g = f.read()
+  f.close()
+  r = []
+  p = nasdaqParser()
+  p.feed(g)    
+  for i in p.getData():
+    miscc = {'underlying':symbol, 'strike':i[8], 'expiration':i[0], 'call':True, 'open_int':i[6]}
+    if i[3] != '-':
+      miscc['bid'] = i[3]
+    if i[4] != '-':
+      miscc['ask'] = i[4]
+    call = Strike(misc=miscc)
+    r.append(call)
+    miscp = {'underlying':symbol, 'strike':i[8], 'expiration':i[9], 'call':False, 'open_int':i[15]}
+    if i[12] != '-':
+      miscp['bid'] = i[12]
+    if i[13] != '-':
+      miscp['ask'] = i[13]
+    put = Strike(misc=miscp)
+    r.append(put)

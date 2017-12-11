@@ -34,24 +34,28 @@ def fix_instance(a, t):
 
 class objects():
   def __init__(self):
-    self.fields = dict()
+    self.fields = dict()     # required fields, (key, type) must match
+    self.auxiliary = dict()  # non-required fields, (key, type) must match
     self.data = dict()
   def __json__(self):
     if not self.isValid():
-      return ''
+      return '{}'
     return json.dumps(self.data, sort_keys=True)
-  def __validate__(self, k):
+  def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):
       # invalid key
       return False
-    if k not in self.fields:
+    if required and k not in self.fields:
       # this key is not required
       return k in self.data
     if k not in self.data or self.data[k] == None:
       # key is required but data is missing
-      return False
-    b, a = fix_instance(self.data[k], self.fields[k])
+      return not required
+    if required:
+      b, a = fix_instance(self.data[k], self.fields[k])
+    else:
+      b, a = fix_instance(self.data[k], self.auxiliary[k])
     if b == False:
       return b
     if b and a != None:
@@ -67,6 +71,11 @@ class objects():
       if not b:
         print "wrong type for key %s" % k
         return False
+    for k in self.auxiliary.keys():
+      b = self.__validate__(k, required=False)
+      if not b:
+        print "wrong type for key %s" % k
+        return False
     return True
   def getKey(self, key):
     b = self.__validate__(key)
@@ -75,13 +84,32 @@ class objects():
     else:
       return None
   def addKey(self, key, val):
-    if key in self.fields:
+    if key in self.auxiliary:
+      b, a = fix_instance(val, self.auxiliary[key])
+      if b == False:
+        return b
+      if a != None:
+        val = a
+    elif key in self.fields:
       b, a = fix_instance(val, self.fields[key])
       if b == False:
         return b
       if a != None:
         val = a
     self.data[key] = val
+    return True
+  def addNoneRequiredField(self, key, tp, force=False):
+    if not isinstance(key, str):
+      return False
+    if not isinstance(tp, type):
+      return False
+    if key in self.fields:
+      # don't change key fields
+      return False
+    if key in self.auxiliary:
+      if force != True:
+        return False
+    self.auxiliary[key] = tp
     return True
   def addRequiredField(self, key, tp, force=False):
     if not isinstance(key, str):
