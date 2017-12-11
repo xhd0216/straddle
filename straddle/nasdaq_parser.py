@@ -41,7 +41,7 @@ class nasdaqParser(HTMLParser):
     if tag == 'tr':
       self.row_begin = False
       #print self.entry
-      if self.entry != None:
+      if self.entry != None and self.seen_table:
         self.data.append(self.entry)
     if tag == 'td':
       self.td = False
