@@ -29,7 +29,8 @@ class earning(objects):
     if self.isValid():
       return self.data['symbol']
     return None
-
+  def getEPS(self):
+    return self.getKey('EPS')
 class earningParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -58,7 +59,12 @@ class earningParser(HTMLParser):
         self.data.append(self.e)
       self.e = None
       self.meet_eps = False
+  def getData(self):
+    self.data.sort(key=lambda e: e.getSymbol())
+    return self.data
   def __json__(self):
     self.data.sort(key=lambda e: e.getSymbol())
     js = '{\"data\":[' + ','.join([i.__json__() for i in self.data]) + ']}'
     return js
+
+

@@ -1,3 +1,10 @@
+"""
+deprecated
+
+parse yahoo option page
+"""
+
+
 import sys
 import os
 import json
@@ -122,4 +129,4 @@ def GetOptionChainPage():
     o = optionParser()
     o.feed(k)
   return
-GetOptionChainPage() 
+#GetOptionChainPage() 
