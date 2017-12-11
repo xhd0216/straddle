@@ -1,4 +1,5 @@
 from straddle.objects import objects
+import json
 
 class testObjects(objects):
   def __init__(self):
@@ -10,11 +11,21 @@ class testObjects(objects):
 def test_objects_to_json():
   t = testObjects()
   t.addKey('str_field', 1)
-  assert t.__json__() == ''
+  assert not t.isValid()
+  js = t.__json__()
+  k = json.loads(js)
+  assert len(k.keys()) == 0 
   t.addKey('int_field', 1)
   t.addKey('float_field', 1.0)
-  assert t.__json__() == '{\"float_field\": 1.0, \"int_field\": 1, \"str_field\": \"1\"}'
-
+  k = json.loads(t.__json__())
+  assert len(k) == 3
+  assert k['int_field'] == 1
+  assert k['float_field'] == 1.0
+  assert k['str_field'] == '1'
+  assert isinstance(k['int_field'], int)
+  assert isinstance(k['float_field'], float)
+  # json.loads converts string to unicode
+  assert isinstance(k['str_field'], unicode)
 def test_inherit_objects():
   t = testObjects()
   assert t.addKey('str_field', 1)

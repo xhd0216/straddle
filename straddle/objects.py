@@ -84,18 +84,16 @@ class objects():
     else:
       return None
   def addKey(self, key, val):
-    if key in self.auxiliary:
-      b, a = fix_instance(val, self.auxiliary[key])
-      if b == False:
-        return b
-      if a != None:
-        val = a
-    elif key in self.fields:
+    b = True
+    a = None
+    if key in self.fields:
       b, a = fix_instance(val, self.fields[key])
-      if b == False:
-        return b
-      if a != None:
-        val = a
+    elif key in self.auxiliary:
+      b, a = fix_instance(val, self.auxiliary[key])
+    if b == False:
+      return b
+    if a != None:
+      val = a
     self.data[key] = val
     return True
   def addNoneRequiredField(self, key, tp, force=False):

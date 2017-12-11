@@ -14,8 +14,6 @@ class nasdaqParser(HTMLParser):
     self.row_begin = False
     self.entry = None
     self.seen_table = False
-    self.headers = []
-    self.header_names = []
     self.counter = 0
     self.table = False
     self.td = False
@@ -96,3 +94,4 @@ def get_strike_list(symbol):
       miscp['ask'] = i[13]
     put = Strike(misc=miscp)
     r.append(put)
+  return r
