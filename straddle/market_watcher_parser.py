@@ -1,6 +1,6 @@
 import HTMLParser
 
-## example: index/vix, stock/aapl
+## example: index/vix, stock/aapl, fund/dust
 market_watcher_url = 'https://www.marketwatch.com/investing/%s/%s/options'
 
 table_headings=["Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt", "Strike", "Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt"]
