@@ -44,7 +44,7 @@ class objects():
   def __json__(self):
     if not self.isValid():
       return '{}'
-    return json.dumps(self.data, sort_keys=True)
+    return json.dumps(self.data, sort_keys=True, indent=3)
   def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):
