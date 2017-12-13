@@ -67,6 +67,8 @@ class objects():
       self.data[k] = a
     return True
   def isValid(self):
+    if self.data == None:
+      return False
     for k in self.fields.keys():
       if k not in self.data or self.data[k] == None:
         print "key %s is missing" % k
