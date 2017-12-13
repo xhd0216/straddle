@@ -1,10 +1,51 @@
 from HTMLParser import HTMLParser
 import urllib2
+import ssl
+import os
+from straddle.strategy import *
+data_place_holder = '-'
 ## example: index/vix, stock/aapl, fund/dust
 market_watcher_url = 'https://www.marketwatch.com/investing/%s/%s/options'
 
 table_headings=["Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt", "Strike", "Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt"]
-
+def getCallStrikeInstance(symb, exp, row):
+  miscc = {'underlying':symb,
+            'strike':row[getStrikeIndex()],
+            'expiration':exp,
+            'call':True,
+            'open_int':row[getCallOpenIntIndex()]}
+  ca = row[getCallAskIndex()]
+  cb = row[getCallBidIndex()]
+  if ca != data_place_holder:
+    miscc['ask'] = ca
+  if cb != data_place_holder:
+    miscc['bid'] = cb
+  r = Strike(misc=miscc)
+  return r 
+def getPutStrikeInstance(symb, exp, row):
+  miscc = {'underlying':symb,
+            'strike':row[getStrikeIndex()],
+            'expiration':exp,
+            'call':False,
+            'open_int':row[getPutOpenIntIndex()]}
+  ca = row[getPutAskIndex()]
+  cb = row[getPutBidIndex()]
+  if ca != data_place_holder:
+    miscc['ask'] = ca
+  if cb != data_place_holder:
+    miscc['bid'] = cb
+  r = Strike(misc=miscc)
+  return r 
+def getCallAskIndex():
+  return 5
+def getPutAskIndex():
+  return 13
+def getStrikeIndex():
+  return 7
+def getCallOpenIntIndex():
+  return 6
+def getPutOpenIntIndex():
+  return 14
 def getAttr(attrs, key):
   for x in attrs:
     if key == x[0]:
@@ -31,7 +72,14 @@ class MarketWatcherParser(HTMLParser):
     self.stock_price = False
     self.row = []
     self.begin_cell = False
-    self.expiration_date = False
+    self.b_expire = False
+    self.data = []
+    self.current_price = 0
+    self.near_strike = []
+    self.expiration_date = ''
+    self.symbol = ''
+  def setSymbol(s):
+    self.symbol = s
   def doXHRtable(self, b=True):
     self.begin_table=b
   def handle_starttag(self, tag, attrs):
@@ -57,13 +105,13 @@ class MarketWatcherParser(HTMLParser):
       a = getAttr(attrs, 'class')
       if 'acenter' not in a:
         self.begin_cell = True
-      self.row.append('-')
+      self.row.append(data_place_holder)
     elif tag == 'td':
       a = getAttr(attrs, 'colspan')
       if a != None:
         a = int(a)
         if a > 10: # a == len(table_headings)
-          self.expiration_date = True
+          self.b_expire = True
   def handle_endtag(self, tag):
     if tag == 'table':
       self.begin_table = False
@@ -72,15 +120,19 @@ class MarketWatcherParser(HTMLParser):
       self.stock_price = False
       if self.begin_table:
         if len(self.row) == len(table_headings):
+          call = getCallInstance(self.symbol, self.expiration_date, row)
+          put = getPutInstance(self.symbol, self.expiration_date, row)
+          self.data.append(call)
+          self.data.append(put)
           print self.row
           self.row = []
     if tag == 'td' and self.begin_cell:
       self.begin_cell = False
-    if tag == 'td' and self.expiration_date:
-      self.expiration_date = False
+    if tag == 'td' and self.b_expire:
+      self.b_expire = False
   def handle_data(self, data):
     expire_str = 'Expires '
-    if self.expiration_date and expire_str in data:
+    if self.b_expire and expire_str in data:
       print "*****", data[data.find(expire_str) + len(expire_str):], "*****"
     if self.begin_cell:
       if self.begin_row:
@@ -88,22 +140,34 @@ class MarketWatcherParser(HTMLParser):
         self.row[-1] = ts
       if self.stock_price:
         if 'Current price' not in data:
+          self.current_price = float(data)
           print '=====', data, '====='
 
 
-def getOptionMW()
-  f = urllib2.urlopen(market_watcher_url % ('stock', 'aapl'))
+def getOptionMW():
+  symb = 'aapl'
+  f = urllib2.urlopen(market_watcher_url % ('stock', symb))
   print f.getcode()
   g = f.read()
   f.close()
   p = MWFormParser()
   p.feed(g)
+  q = MarketWatcherParser()
+  q.doXHRtable()
+  q.setsymbol(symb)
   for u in p.getLinks():
     f = urllib2.urlopen('https://www.marketwatch.com' + u)
     g = f.read()
-    print f.getcode()
+    code = f.getcode()
     f.close()
-    q = MarketWatcherParser()
-    q.doXHRtable()
+    if code != 200:
+      print 'error when loading url', u
+      continue
+    #q = MarketWatcherParser()
+    #q.doXHRtable()
     q.feed(g)
-
+  fi = open('data_output.txt', 'w')
+  for i in q.data:
+    fi.write(i.__json__())
+  fi.close()
+getOptionMW()
