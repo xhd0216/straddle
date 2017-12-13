@@ -141,7 +141,9 @@ class MarketWatcherParser(HTMLParser):
   def handle_data(self, data):
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
-      print "*****", data[data.find(expire_str) + len(expire_str):], "*****"
+      ddd = data[data.find(expire_str) + len(expire_str):]
+      self.expiration_date = ddd
+      print "*****", ddd, "*****"
     if self.begin_cell:
       if self.begin_row:
         ts = data.strip()
