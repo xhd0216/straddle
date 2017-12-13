@@ -8,38 +8,14 @@ data_place_holder = '-'
 market_watcher_url = 'https://www.marketwatch.com/investing/%s/%s/options'
 
 table_headings=["Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt", "Strike", "Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt"]
-def getCallStrikeInstance(symb, exp, row):
-  miscc = {'underlying':symb,
-            'strike':row[getStrikeIndex()],
-            'expiration':exp,
-            'call':True,
-            'open_int':row[getCallOpenIntIndex()]}
-  ca = row[getCallAskIndex()]
-  cb = row[getCallBidIndex()]
-  if ca != data_place_holder:
-    miscc['ask'] = ca
-  if cb != data_place_holder:
-    miscc['bid'] = cb
-  r = Strike(misc=miscc)
-  return r 
-def getPutStrikeInstance(symb, exp, row):
-  miscc = {'underlying':symb,
-            'strike':row[getStrikeIndex()],
-            'expiration':exp,
-            'call':False,
-            'open_int':row[getPutOpenIntIndex()]}
-  ca = row[getPutAskIndex()]
-  cb = row[getPutBidIndex()]
-  if ca != data_place_holder:
-    miscc['ask'] = ca
-  if cb != data_place_holder:
-    miscc['bid'] = cb
-  r = Strike(misc=miscc)
-  return r 
 def getCallAskIndex():
   return 5
 def getPutAskIndex():
   return 13
+def getCallBidIndex():
+  return 4
+def getPutBidIndex():
+  return 12
 def getStrikeIndex():
   return 7
 def getCallOpenIntIndex():
@@ -52,6 +28,38 @@ def getAttr(attrs, key):
       return x[1]
   return None
 
+def getCallStrikeInstance(symb, exp, row):
+  miscc = {'underlying':symb,
+            'strike':row[getStrikeIndex()],
+            'expiration':exp,
+            'call':True}
+  oi = row[getCallOpenIntIndex()]
+  ca = row[getCallAskIndex()]
+  cb = row[getCallBidIndex()]
+  if oi != data_place_holder:
+    miscc['open_int'] = oi
+  if ca != data_place_holder:
+    miscc['ask'] = ca
+  if cb != data_place_holder:
+    miscc['bid'] = cb
+  r = Strike(misc=miscc)
+  return r 
+def getPutStrikeInstance(symb, exp, row):
+  miscc = {'underlying':symb,
+            'strike':row[getStrikeIndex()],
+            'expiration':exp,
+            'call':False}
+  oi = row[getPutOpenIntIndex()]
+  ca = row[getPutAskIndex()]
+  cb = row[getPutBidIndex()]
+  if oi != data_place_holder:
+    miscc['open_int'] = oi
+  if ca != data_place_holder:
+    miscc['ask'] = ca
+  if cb != data_place_holder:
+    miscc['bid'] = cb
+  r = Strike(misc=miscc)
+  return r 
 class MWFormParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -78,7 +86,7 @@ class MarketWatcherParser(HTMLParser):
     self.near_strike = []
     self.expiration_date = ''
     self.symbol = ''
-  def setSymbol(s):
+  def setSymbol(self, s):
     self.symbol = s
   def doXHRtable(self, b=True):
     self.begin_table=b
@@ -120,8 +128,8 @@ class MarketWatcherParser(HTMLParser):
       self.stock_price = False
       if self.begin_table:
         if len(self.row) == len(table_headings):
-          call = getCallInstance(self.symbol, self.expiration_date, row)
-          put = getPutInstance(self.symbol, self.expiration_date, row)
+          call = getCallStrikeInstance(self.symbol, self.expiration_date, self.row)
+          put = getPutStrikeInstance(self.symbol, self.expiration_date, self.row)
           self.data.append(call)
           self.data.append(put)
           print self.row
@@ -149,12 +157,14 @@ def getOptionMW():
   f = urllib2.urlopen(market_watcher_url % ('stock', symb))
   print f.getcode()
   g = f.read()
+  encoding=f.headers['content-type'].split('charset=')[-1]
+  g = unicode(g, encoding)
   f.close()
   p = MWFormParser()
   p.feed(g)
   q = MarketWatcherParser()
   q.doXHRtable()
-  q.setsymbol(symb)
+  q.setSymbol(symb)
   for u in p.getLinks():
     f = urllib2.urlopen('https://www.marketwatch.com' + u)
     g = f.read()
