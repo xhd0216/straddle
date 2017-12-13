@@ -18,6 +18,10 @@ def fix_instance(a, t):
       return False, None
   elif t == int:
     try:
+      if isinstance(a, str) and ',' in a:
+        a = a.replace(',','')
+      if isinstance(a, str) and '.' in a:
+        a = a.split('.')[0]
       a = float(a)
       a = int(a)
     except:
