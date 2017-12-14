@@ -87,6 +87,10 @@ class MarketWatcherParser(HTMLParser):
     self.near_strike = []
     self.expiration_date = ''
     self.symbol = ''
+    self.straddles = []
+    self.bigger_straddle = False
+  def getStraddles(self):
+    return self.straddles
   def setSymbol(self, s):
     self.symbol = s
   def doXHRtable(self, b=True):
@@ -133,7 +137,11 @@ class MarketWatcherParser(HTMLParser):
           put = getPutStrikeInstance(self.symbol, self.expiration_date, self.row)
           self.data.append(call)
           self.data.append(put)
-          print self.row
+          if self.bigger_straddle:
+            self.bigger_straddle = False
+            st = straddle(legs=[call, put], price=self.current_price)
+            self.straddles.append(st)
+          ##print self.row
           self.row = []
     if tag == 'td' and self.begin_cell:
       self.begin_cell = False
@@ -144,7 +152,7 @@ class MarketWatcherParser(HTMLParser):
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]
       self.expiration_date = ddd
-      print "*****", ddd, "*****"
+      ##print "*****", ddd, "*****"
     if self.begin_cell:
       if self.begin_row:
         ts = data.strip()
@@ -152,7 +160,10 @@ class MarketWatcherParser(HTMLParser):
       if self.stock_price:
         if 'Current price' not in data:
           self.current_price = float(data)
-          print '=====', data, '====='
+          ##print '=====', data, '====='
+          st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
+          self.straddles.append(st)
+          self.bigger_straddle = True
   def getData(self):
     return self.data
 
@@ -174,4 +185,9 @@ def getOptionMW():
   fi = open('data_output.json', 'w')
   fi.write('{\"data\":['+','.join([i.__json__() for i in q.getData()])+']}')
   fi.close()
+  fo = open('straddles.json', 'w')
+  fo.write('{\"data\":['+','.join([i.__json__() for i in q.getStraddles()])+']}')
+  for i in q.getStraddles():
+    #print i.__json__()
+    print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
 getOptionMW()

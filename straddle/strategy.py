@@ -48,7 +48,7 @@ class Strike(objects):
   def isCall(self):
     if not self.data or 'call' not in self.data or self.data['call'] == None:
       return None
-    return True
+    return self.getKey('call')
   def getUnderlying(self):
     return self.getKey('underlying')
   def getExpirationStr(self):
@@ -125,19 +125,12 @@ def parseStrike(s):
 
 class strategies():
   def __init__(self):
-    self.strikes = []
+    self.strikes = [] # legs
     self.name = "unspecified"
-  def __str__():
-    return str(self.price)
+    self.uPrice = 0.0 # price of underlying
   def __json__(self):
-    s = "{\"name\":\"%s\", \"data\":[" % self.getName()
-    for i in range(len(self.strikes)):
-      if hasattr(self.strikes[i], "__json__"):
-        s += self.strikes[i].__json__()
-      else:
-        s += "null"
-      if i != len(self.strikes) - 1:
-        s += ","
+    s = "{\"name\":\"%s\", \"current_price\":%s, \"legs\":[" % (self.getName(), self.uPrice)
+    s += ','.join([i.__json__() for i in self.strikes]) 
     s += "]}"
     return s
   def getName(self):
@@ -150,28 +143,42 @@ class strategies():
     return su
 	
 class straddle(strategies):
-  def __init__(self, price1=None, expiration=None, position=None):
+  def __init__(self, legs=None, price=None):
     strategies.__init__(self)
-    self.strikes = []
     self.name = "straddle"
-    if not price1 or not expiration:
-      self.strikes = [None] * 2
-    else:
-			if isinstance(price1, list):
-				p = price1[0]
-			else:
-				p = price1
-			if isinstance(expiration, list):
-				e = expiration[0]
-			else:
-				e = expiration
-			if not posistion:
-				po = 100
-			elif isinstance(position, list):
-				po = position[0]
-			else:
-				po = position
-			self.strikes.append(Strike(p, e, "call"))
-			self.strikes.append(Strike(p, e, "put"))
-  def __str__(self):
-    return str(self.price) + str(self.strike)
+    if legs != None:
+      self.strikes = legs
+    if price != None:
+      self.uPrice = price
+  def getStraddlePrice(self):
+    return self.strikes[0].data['ask'] + self.strikes[1].data['ask']
+  def getCurrentPrice(self):
+    return self.uPrice
+  def getUnderlying(self):
+    return self.strikes[0].getUnderlying()
+  def getExpirationStr(self):
+    return self.strikes[0].getExpirationStr()
+  def getStrike(self):
+    return self.strikes[0].getStrike()
+  def isValid(self):
+    if len(self.strikes) != 2:
+      print "number of legs is not 2"
+      return False
+    a = self.strikes[0]
+    b = self.strikes[1]
+    if not isinstance(a, Strike) or not isinstance(b, Strike):
+      print "legs are not strikes"
+      return False
+    if a.isCall() == b.isCall():
+      print "must be one call one put", a.isCall(), b.isCall()
+      return False
+    if a.getUnderlying() != b.getUnderlying():
+      print "must be same underlying stock"
+      return False
+    if a.getExpirationStr() != b.getExpirationStr():
+      print "must be same expiration date"
+      return False
+    if a.getStrike() != b.getStrike():
+      print "must be same strike"
+      return False
+    return True
