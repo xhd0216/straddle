@@ -3,6 +3,7 @@ import urllib2
 import ssl
 import os
 from straddle.strategy import *
+from util.networks import *
 data_place_holder = '-'
 ## example: index/vix, stock/aapl, fund/dust
 market_watcher_url = 'https://www.marketwatch.com/investing/%s/%s/options'
@@ -152,34 +153,25 @@ class MarketWatcherParser(HTMLParser):
         if 'Current price' not in data:
           self.current_price = float(data)
           print '=====', data, '====='
-
+  def getData(self):
+    return self.data
 
 def getOptionMW():
   symb = 'aapl'
-  f = urllib2.urlopen(market_watcher_url % ('stock', symb))
-  print f.getcode()
-  g = f.read()
-  encoding=f.headers['content-type'].split('charset=')[-1]
-  g = unicode(g, encoding)
-  f.close()
+  g = GetURL(market_watcher_url % ('stock', symb))
+  if g == None:
+    return
   p = MWFormParser()
   p.feed(g)
   q = MarketWatcherParser()
   q.doXHRtable()
   q.setSymbol(symb)
   for u in p.getLinks():
-    f = urllib2.urlopen('https://www.marketwatch.com' + u)
-    g = f.read()
-    code = f.getcode()
-    f.close()
-    if code != 200:
-      print 'error when loading url', u
+    g = GetURL('https://www.marketwatch.com' + u)
+    if g == None:
       continue
-    #q = MarketWatcherParser()
-    #q.doXHRtable()
     q.feed(g)
-  fi = open('data_output.txt', 'w')
-  for i in q.data:
-    fi.write(i.__json__())
+  fi = open('data_output.json', 'w')
+  fi.write('{\"data\":['+','.join([i.__json__() for i in q.getData()])+']}')
   fi.close()
 getOptionMW()

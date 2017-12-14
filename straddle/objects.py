@@ -1,5 +1,7 @@
 import json
 
+def isStrUnicode(a):
+  return isinstance(a, str) or isinstance(a, unicode)
 def fix_instance(a, t):
   # if a is not an instance of t, try to fix it
   # return (ok, a) 
@@ -18,9 +20,9 @@ def fix_instance(a, t):
       return False, None
   elif t == int:
     try:
-      if isinstance(a, str) and ',' in a:
+      if isStrUnicode(a) and ',' in a:
         a = a.replace(',','')
-      if isinstance(a, str) and '.' in a:
+      if isStrUnicode(a) and '.' in a:
         a = a.split('.')[0]
       a = float(a)
       a = int(a)
