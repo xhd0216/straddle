@@ -1,42 +1,5 @@
 import json
-
-def isStrUnicode(a):
-  return isinstance(a, str) or isinstance(a, unicode)
-def fix_instance(a, t):
-  # if a is not an instance of t, try to fix it
-  # return (ok, a) 
-  # ok=False means cannot be fixed
-  # ok=True means it is fixed, a is return; OR, a is an instance of t, needs not to fix
-  if not isinstance(t, type):
-    print "input error: needs a type"
-    return False, None
-  if isinstance(a, t):
-    return True, None
-  # try to fix it
-  if t == str:
-    try:
-      a = str(a)
-    except:
-      return False, None
-  elif t == int:
-    try:
-      if isStrUnicode(a) and ',' in a:
-        a = a.replace(',','')
-      if isStrUnicode(a) and '.' in a:
-        a = a.split('.')[0]
-      a = float(a)
-      a = int(a)
-    except:
-      return False, None
-  elif t == float:
-    try:
-      a = float(a)
-    except:
-      return False, None
-  else:
-    return False, None
-  return True, a
-  
+from util.misc import *
 
 class objects():
   def __init__(self):
