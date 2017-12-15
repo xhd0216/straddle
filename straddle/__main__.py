@@ -1,5 +1,5 @@
 from straddle.earnings import *
-from straddle.nasdaq_parser import *
+from straddle.market_watcher_parser import *
 import os
 import urllib2
 
@@ -26,11 +26,8 @@ def getAllEarnings():
     # r: list of Strikes
     # u: symbol
     u = d.getSymbol()
-    r = get_strike_list(u)
     print "========================"
     print d.data
-    for st in r:
-      print st.__json__()
-      
-  
+    getOptionMW(u) 
+ 
 getAllEarnings()

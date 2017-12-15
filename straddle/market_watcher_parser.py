@@ -161,14 +161,15 @@ class MarketWatcherParser(HTMLParser):
         if 'Current price' not in data:
           self.current_price = float(data)
           ##print '=====', data, '====='
-          st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
-          self.straddles.append(st)
-          self.bigger_straddle = True
+          if len(self.data) > 1:
+            st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
+            self.straddles.append(st)
+            self.bigger_straddle = True
   def getData(self):
     return self.data
 
-def getOptionMW():
-  symb = 'aapl'
+def getOptionMW(symbol='aapl'):
+  symb = symbol
   g = GetURL(market_watcher_url % ('stock', symb))
   if g == None:
     return
@@ -182,12 +183,12 @@ def getOptionMW():
     if g == None:
       continue
     q.feed(g)
-  fi = open('data_output.json', 'w')
-  fi.write('{\"data\":['+','.join([i.__json__() for i in q.getData()])+']}')
-  fi.close()
-  fo = open('straddles.json', 'w')
-  fo.write('{\"data\":['+','.join([i.__json__() for i in q.getStraddles()])+']}')
+  #fi = open('data_output.json', 'w')
+  #fi.write('{\"data\":['+','.join([i.__json__() for i in q.getData()])+']}')
+  #fi.close()
+  #fo = open('straddles.json', 'w')
+  #fo.write('{\"data\":['+','.join([i.__json__() for i in q.getStraddles()])+']}')
   for i in q.getStraddles():
     #print i.__json__()
     print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
-getOptionMW()
+#getOptionMW()

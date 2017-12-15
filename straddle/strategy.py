@@ -63,6 +63,10 @@ class Strike(objects):
       self.error = "wrong date time formate"
       return None  
     return dt
+  def getAsk(self):
+    return self.getKey('ask')
+  def getBid(self):
+    return self.getKey('bid')
   def getCurrentPrice(self):
     a = self.getStrike()
     b = self.isCall()
@@ -123,49 +127,64 @@ def parseStrike(s):
 		return None
 	return r
 
-class strategies():
+strategy_must = {
+  "name":str,
+  "strikes":list,
+}
+strategy_additional = {
+  "underlying_price":float,
+  "positions":list
+}
+
+class strategies(objects):
   def __init__(self):
-    self.strikes = [] # legs
-    self.name = "unspecified"
-    self.uPrice = 0.0 # price of underlying
+    objects.__init__(self)
+    self.fields = strategy_must
+    self.auxiliary = strategy_additional
   def __json__(self):
-    s = "{\"name\":\"%s\", \"current_price\":%s, \"legs\":[" % (self.getName(), self.uPrice)
-    s += ','.join([i.__json__() for i in self.strikes]) 
+    # TODO: this does not support indent in json print
+    s = "{\"name\":\"%s\", \"current_price\":%s, \"legs\":[" % (self.getName(), self.getUnderlyingPrice())
+    s += ','.join([i.__json__() for i in self.getLegs()]) 
     s += "]}"
     return s
   def getName(self):
-    return self.name
-  def getQuotePrice(self):
-    su = 0.0
-    for s in self.strikes:
-			assert isinstance(s, Strike)
-			su += s.getCurrentPrice()
-    return su
-	
+    return self.getKey('name')
+  def getStrikes(self):
+    return self.getKey('strikes')
+  def getLegs(self):
+    return self.getStrikes()
+  def getUnderlyingPrice(self):
+    return self.getKey('underlying_price')
+
 class straddle(strategies):
   def __init__(self, legs=None, price=None):
     strategies.__init__(self)
-    self.name = "straddle"
+    self.data['name'] = "straddle"
     if legs != None:
-      self.strikes = legs
+      self.data['strikes'] = legs
     if price != None:
-      self.uPrice = price
+      self.data['underlying_price'] = price
   def getStraddlePrice(self):
-    return self.strikes[0].data['ask'] + self.strikes[1].data['ask']
+    a = self.getStrikes()
+    try:
+      b = sum([x.getAsk() for x in a])
+    except:
+      return None
+    return b
   def getCurrentPrice(self):
-    return self.uPrice
+    return self.getKey('underlying_price')
   def getUnderlying(self):
-    return self.strikes[0].getUnderlying()
+    return self.getLegs()[0].getUnderlying()
   def getExpirationStr(self):
-    return self.strikes[0].getExpirationStr()
+    return self.getLegs()[0].getExpirationStr()
   def getStrike(self):
-    return self.strikes[0].getStrike()
+    return self.getLegs()[0].getStrike()
   def isValid(self):
-    if len(self.strikes) != 2:
+    if len(self.getLegs()) != 2:
       print "number of legs is not 2"
       return False
-    a = self.strikes[0]
-    b = self.strikes[1]
+    a = self.getLegs()[0]
+    b = self.getLegs()[1]
     if not isinstance(a, Strike) or not isinstance(b, Strike):
       print "legs are not strikes"
       return False

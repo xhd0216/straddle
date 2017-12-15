@@ -6,10 +6,10 @@ class objects():
     self.fields = dict()     # required fields, (key, type) must match
     self.auxiliary = dict()  # non-required fields, (key, type) must match
     self.data = dict()
-  def __json__(self):
+  def __json__(self, indent=None):
     if not self.isValid():
       return '{}'
-    return json.dumps(self.data, sort_keys=True, indent=3)
+    return json.dumps(self.data, sort_keys=True, indent=indent)
   def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):
