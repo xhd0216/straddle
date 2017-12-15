@@ -2,10 +2,10 @@ from straddle.earnings import *
 from straddle.market_watcher_parser import *
 import os
 import urllib2
+import sys, getopt
 
 print "welcome to straddle"
 
-#yahoo_earning_page = 'https://finance.yahoo.com/calendar/earnings'
 
 def getAllEarnings():
   f = urllib2.urlopen(yahoo_earning_url)
@@ -30,4 +30,16 @@ def getAllEarnings():
     print d.data
     getOptionMW(u) 
  
-getAllEarnings()
+if __name__=="__main__":
+  try:
+    opts, args = getopt.getopt(sys.argv[1:],"has:",["symbol="])
+  except getopt.GetoptError:
+    print 'python straddle [arguments]'
+    sys.exit(2)
+  for opt, arg in opts:
+    if opt == '-h':
+      print 'python straddle [argument]'
+    elif opt == '-a':
+      getAllEarnings()
+    elif opt == '-s':
+      getOptionMW(arg)
