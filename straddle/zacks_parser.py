@@ -2,6 +2,7 @@ from HTMLParser import *
 from util.misc import *
 from util.networks import *
 from straddle.earnings import *
+from straddle.market_watcher_parser import *
 import json
 
 
@@ -38,6 +39,7 @@ def GetEarningsInRange(a, b):
       earn.setEPS(e)
       earn.setDate(str(t))
       print earn.__json__()
+      getOptionMW(earn.getSymbol())
     # print json.dumps(j, indent=3)
     # go call the api, it should return a json object
 GetEarningsInRange(3,6)
