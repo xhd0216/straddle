@@ -1,6 +1,6 @@
 import urllib2
 
-def GetURL(url):
+def GetURL(url, encoded=False):
   try:
     f = urllib2.urlopen(url)
     g = f.read()
@@ -11,11 +11,12 @@ def GetURL(url):
   c = f.getcode()
   if c != 200:
     print 'return code', c
-    return NonA
-  if 'content-type' in f.headers:
-    ct = f.headers['content-type']
-    if 'charset=' in ct:
-      encoding=ct.split('charset=')[-1]
-      g = unicode(g, encoding)
+    return None
+  if encoded:
+    if 'content-type' in f.headers:
+      ct = f.headers['content-type']
+      if 'charset=' in ct:
+        encoding=ct.split('charset=')[-1]
+        g = unicode(g, encoding)
   return g
   

@@ -170,7 +170,7 @@ class MarketWatcherParser(HTMLParser):
 
 def getOptionMW(symbol='aapl'):
   symb = symbol
-  g = GetURL(market_watcher_url % ('stock', symb))
+  g = GetURL(market_watcher_url % ('stock', symb), encode=True)
   if g == None:
     return
   p = MWFormParser()

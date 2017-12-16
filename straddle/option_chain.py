@@ -8,7 +8,6 @@ parse yahoo option page
 import sys
 import os
 import json
-import urllib2
 from HTMLParser import *
 import datetime, time
 from objects import objects
@@ -87,10 +86,7 @@ class optionParser(HTMLParser):
     if tag == 'select' and self.expd:
       self.expd = False
 def getOptionJson(symbol):
-  f = urllib2.urlopen(starting_page % symbol)
-  # print f.getcode()
-  g = f.read()
-  f.close()
+  g = GetURL(starting_page % symbol)
   r=g.find('root.App.main')
   g1 = g[r:]
   left = g1.find('{')
@@ -109,9 +105,7 @@ def GetOptionChainPage():
     print 'failed to get url for earning'
     return 
   try:
-    f = urllib2.urlopen(earning_url)
-    g = f.read()
-    f.close()
+    g = GetURL(earning_url)
   except:
     print 'failed to open page'
     return
@@ -122,10 +116,7 @@ def GetOptionChainPage():
     u = options_url % i.getSymbol()
     # print u
     # getOptionJson(i.getSymbol())
-    h = urllib2.urlopen(u)
-    k = h.read()
-    print u, h.getcode(), len(k), 'select' in k
-    h.close()
+    k = GetURL(u)
     o = optionParser()
     o.feed(k)
   return
