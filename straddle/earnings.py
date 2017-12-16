@@ -2,7 +2,7 @@ import urllib2
 from HTMLParser import *
 import json
 from objects import objects
-
+from util.misc import isStrUnicode
 yahoo_earning_url = 'https://finance.yahoo.com/calendar/earnings'
 
 
@@ -16,7 +16,7 @@ class earning(objects):
       for i in misc.keys():
         self.data[i] = misc[i]
   def setSymbol(self, symbol):
-    if isinstance(symbol, str):
+    if isStrUnicode(symbol):
       self.data['symbol'] = symbol
   def setEPS(self, eps):
     try:
@@ -31,6 +31,8 @@ class earning(objects):
     return None
   def getEPS(self):
     return self.getKey('EPS')
+  def setDate(self, s):
+    self.addKey('date', s)
 class earningParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)

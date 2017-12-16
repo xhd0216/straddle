@@ -1,3 +1,5 @@
+import datetime
+
 def isStrUnicode(a):
   return isinstance(a, str) or isinstance(a, unicode)
 
@@ -18,7 +20,16 @@ def fix_instance(a, t):
   if isinstance(a, t):
     return True, None
   # try to fix it
-  if t == str:
+  if t == str: # we don't support unicode  yet, str only
+    if isStrUnicode(a):
+      # convert unicode
+      try:
+        a = a.encode('UTF-8')
+      except:
+        # cannot fix, but keep it...
+        return True, None
+      return True, a
+    # otherwise      
     try:
       a = str(a)
     except:
@@ -46,3 +57,40 @@ def fix_instance(a, t):
   else:
     return False, None
   return True, a
+
+date_origin = datetime.date(1970, 1, 1)
+
+def getRoundDate(d):
+  try:
+    r =  datetime.date(d.year, d.month, d.day)
+  except:
+    print "format error"
+    return None
+  return r
+# return today's date
+def getNowDate():
+  now = datetime.datetime.now()
+  return getRoundDate(now)
+
+# give a date (or datetime), return the seconds (of the date, not time)
+def getTimeSecond(date):
+  try: 
+    t = getRoundDate(date)
+    r = (t - date_origin).total_seconds()
+  except:
+    return None
+  return int(r)
+
+# return the seconds of some days after today
+def getDayAfter(days):
+  if not isinstance(days, int):
+    return None      
+  return getTimeSecond(getNowDate() + datetime.timedelta(days=days))
+
+# get a range of days in range(a,b) = [a,b), in seconds.
+def getDayAfterRange(a, b):
+  if not isinstance(a, int) or not isinstance(b, int):
+    return []
+  r = getNowDate()                           
+  return [r + datetime.timedelta(days=i) for i in range(a,b)]
+  
