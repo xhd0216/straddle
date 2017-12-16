@@ -27,7 +27,7 @@ class objects():
       b, a = fix_instance(self.data[k], self.auxiliary[k])
     if b == False:
       return b
-    if b and a != None:
+    if a != None:
       # fix it.
       self.data[k] = a
     return True
@@ -54,14 +54,17 @@ class objects():
       return self.data[key]
     else:
       return None
-  def addKey(self, key, val):
+  def addKey(self, key, val, replace=True):
     b = True
     a = None
+    if not replace and key in self.data:
+      # don't replace
+      return False
     if key in self.fields:
       b, a = fix_instance(val, self.fields[key])
     elif key in self.auxiliary:
       b, a = fix_instance(val, self.auxiliary[key])
-    if b == False:
+    if not b:
       return b
     if a != None:
       val = a

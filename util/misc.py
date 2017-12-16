@@ -48,9 +48,10 @@ def fix_instance(a, t):
       return False, None
   elif t == float:
     try:
-      if isStrUnicode(a) and ',' in a:
-        # handle the case '3,128'
-        a = a.replace(',','')
+      if isStrUnicode(a):
+        if ',' in a:
+          # handle the case '3,128'
+          a = a.replace(',','')
       a = float(a)
     except:
       return False, None

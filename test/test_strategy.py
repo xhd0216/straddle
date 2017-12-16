@@ -54,7 +54,13 @@ def test_setStrikePosition():
   assert r.error == None
   
 def test_getStrategyName():
-  s = straddle()
+  strike1 = Strike(underlying='aapl', strike=50.0, expiration="Dec 17, 2017", call=True)
+  strike2 = Strike(underlying='aapl', strike=50.0, expiration="Dec 17, 2017", call=False) 
+  assert strike1.setAsk(3.14)
+  assert strike2.setAsk(4.21) 
+  s = straddle(legs=[strike1, strike2], price=52.35)
   assert s.getName() == "straddle"
   d = get_json_dict(s)
   assert d['name'] == "straddle"
+  assert s.isValid()
+  assert s.getStraddlePrice() == 7.35 

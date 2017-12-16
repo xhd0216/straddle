@@ -1,6 +1,7 @@
 import json
-from datetime import datetime
+from datetime import *
 from objects import objects
+from util.misc import *
 
 default_underlying = "SPY"
 default_strike = 100.0
@@ -9,7 +10,6 @@ default_call = True
 default_misc = None
 
 default_date_format = "%b %d, %Y" ## Nov 11, 2017
-default_expiration_date = datetime.strptime(default_expiration, default_date_format)
 
 strike_field = {'underlying':str, 
                 'strike':float,
@@ -58,7 +58,7 @@ class Strike(objects):
     if s == None:
       return None
     try:
-      dt = datetime.strptime(s, fm)
+      dt = datetime.datetime.strptime(s, fm)
     except:
       self.error = "wrong date time formate"
       return None  
@@ -118,7 +118,27 @@ class Strike(objects):
       else:
         self.data['position'] = a
     return self.data 
-
+  def setAsk(self, m):
+    b, a = fix_instance(m, float)
+    if not b:
+      m = 0.0
+    elif a != None:
+      m = a
+    return self.addKey('ask', m) 
+  def setBid(self, m):
+    b, a = fix_instance(m, float)
+    if not b:
+      m = 0.0
+    elif a != None:
+      m = a
+    return self.addKey('bid', m)
+  def setOpenInt(self, m):
+    b, a = fix_instance(m, int)
+    if not b:
+      m = 0
+    elif a!= None:
+      m = a
+    return self.addKey('open_int', m)
 def parseStrike(s):
 	try:
 		a = json.loads(s)
