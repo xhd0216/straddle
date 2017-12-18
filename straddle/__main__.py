@@ -7,7 +7,7 @@ print "welcome to straddle"
 
 
 def getAllEarnings():
-  g = (yahoo_earning_url)
+  g = GetURL(yahoo_earning_url)
   ep = earningParser()
   ep.feed(g)
   data = ep.getData()

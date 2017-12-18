@@ -183,12 +183,6 @@ def getOptionMW(symbol='aapl'):
     if g == None:
       continue
     q.feed(g)
-  #fi = open('data_output.json', 'w')
-  #fi.write('{\"data\":['+','.join([i.__json__() for i in q.getData()])+']}')
-  #fi.close()
-  #fo = open('straddles.json', 'w')
-  #fo.write('{\"data\":['+','.join([i.__json__() for i in q.getStraddles()])+']}')
   for i in q.getStraddles():
-    #print i.__json__()
     print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
 #getOptionMW()
