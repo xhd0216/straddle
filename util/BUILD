@@ -1,0 +1,16 @@
+py_library(
+  name="misc",
+  deps=[],
+  srcs=["misc.py"],
+  visibility=[
+    "//visibility:public"
+  ]
+)
+py_library(
+  name="networks",
+  deps=[],
+  srcs=["networks.py"],
+  visibility=[
+    "//visibility:public"
+  ]
+)
