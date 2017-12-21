@@ -1,0 +1,24 @@
+py_library(
+  name="straddle_objects",
+  srcs=["objects.py"],
+  deps=[
+    "//util:misc"
+  ],
+)
+py_library(
+  name="strategy_lib",
+  srcs=["strategy.py"],
+  deps=["straddle_objects"]
+)
+py_library(
+  name="market_watcher_parser",
+  srcs=["market_watcher_parser.py"],
+  deps=[
+    "straddle_objects", 
+    "strategy_lib",
+    "//util:networks",
+  ],
+  visibility=[
+    "//test:__pkg__"
+  ]
+)
