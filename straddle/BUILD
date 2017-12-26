@@ -22,3 +22,13 @@ py_library(
     "//test:__pkg__"
   ]
 )
+py_library(
+  name="zacks_parser",
+  srcs=["zacks_parser.py"],
+  deps=[
+    "//util:networks",
+  ],
+  visibility=[
+    "//:__pkg__",
+  ],
+)
