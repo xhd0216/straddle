@@ -3,7 +3,14 @@ make install
 
 make test
 
-python straddle
+python straddle -h
+
+# also supports bazel
+in /straddle
+
+bazel build //...
+bazel test //...
+bazel clean
 
 
 known issues:
