@@ -1,4 +1,5 @@
 from lib.parser import *
+from util.misc import *
 
 ## s = 'http://www.insider-monitor.com/top10_insider_buys_week.html'
 ## columns in the title
