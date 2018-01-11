@@ -10,4 +10,4 @@ def test_insider_page():
   print p.getTable()
   t = p.getAggregatedTable()
   for i in t.keys():
-    print i, 'value:', t[i][1], 'shares:', t[i][0], 'price:', t[i][1]/t[i][0]
+    print i, 'value:', t[i][1], 'shares:', t[i][0]

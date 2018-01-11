@@ -3,6 +3,7 @@ from lib.parser import *
 ## s = 'http://www.insider-monitor.com/top10_insider_buys_week.html'
 ## columns in the title
 columns = ['symbol', 'issuer', 'insider name', 'shares', 'price', 'value', 'date']
+num_columns = len(columns)
 
 class insiderParser(myParser):
   def __init__(self):
@@ -28,8 +29,8 @@ class insiderParser(myParser):
       self.data_row.append(self.last_symbol)
     if tag == 'tr':
       if self.isTagOn('table'):
-        #print self.data_row
-        self.table.append(self.data_row)
+        if len(self.data_row) >= num_columns:
+          self.table.append(self.data_row)
         self.data_row = []
     self.tagOff(tag)
   def getTable(self):
@@ -43,6 +44,16 @@ class insiderParser(myParser):
       if sym not in self.aggregated:
         self.aggregated[sym] = [0, 0]
       d = self.aggregated[sym]
-      d[0] += i[3]
-      d[0] += i[5]
+      d_s = i[3]
+      d_v = i[5]
+      b_s, a_s = fix_instance(d_s, int)
+      b_v, a_v = fix_instance(d_v, int)
+      if not b_s or not b_v:
+        continue
+      if a_s != None:
+        d_s = a_s
+      if a_v != None:
+        d_v = a_v
+      d[0] += d_s
+      d[1] += d_v
     return self.aggregated

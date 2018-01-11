@@ -4,7 +4,8 @@ binpath = $(vepath)/bin
 
 install:
 	python setup.py install
-
+uninstall:
+	pip uninstall Straddle
 test: 
 	test -d $(vepath) || virtualenv $(vepath)
 	. $(vepath)/bin/activate
