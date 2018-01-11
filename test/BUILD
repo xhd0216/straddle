@@ -13,3 +13,19 @@ py_test(
   ],
   timeout="short"
 )
+py_test(
+  name="test_insider",
+  srcs = [
+    "test_insider.py", 
+  ],
+  main="test_insider.py",
+  deps = [
+    "//straddle:insider_parser",
+    "//util:misc",
+  ],
+  data = [
+    "insider.html"
+  ],
+  timeout="short"
+)
+

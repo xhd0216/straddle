@@ -29,12 +29,12 @@ py_library(
 )
 py_library(
   name="insider_parser",
-  src=["insider_parser.py"],
+  srcs=["insider_parser.py"],
   deps=[
     "//util:networks",
     "//lib:parser",
   ],
   visibility=[
-    "//:__pkg__",
+    "//test:__pkg__",
   ],
 )
