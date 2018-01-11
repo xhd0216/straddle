@@ -28,15 +28,18 @@ class insiderParser(myParser):
       self.data_row.append(self.last_symbol)
     if tag == 'tr':
       if self.isTagOn('table'):
-        print self.data_row
+        #print self.data_row
         self.table.append(self.data_row)
         self.data_row = []
     self.tagOff(tag)
+  def getTable(self):
+    return self.table
 
 def test_insider_page():
   ## s = 'http://www.insider-monitor.com/top10_insider_buys_week.html'
-  f = open(os.path.join(os.path.dirname(__file__), 'insider.html')
+  f = open(os.path.join(os.path.dirname(__file__), 'insider.html'))
   g = f.read()
   f.close()
   p = insiderParser()
-  p.feed(g)
+  p.feed(g) 
+  print p.getTable()
