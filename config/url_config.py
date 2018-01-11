@@ -1,4 +1,4 @@
-from straddle.objects import objects
+from lib.objects import objects
 import os
 import json
 

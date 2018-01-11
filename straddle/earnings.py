@@ -1,7 +1,12 @@
+###############################
+## deprecated, using zacks now
+###############################
+
+
 import urllib2
 from HTMLParser import *
 import json
-from objects import objects
+from lib.objects import objects
 from util.misc import isStrUnicode
 yahoo_earning_url = 'https://finance.yahoo.com/calendar/earnings'
 

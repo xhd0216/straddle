@@ -10,7 +10,7 @@ import os
 import json
 from HTMLParser import *
 import datetime, time
-from objects import objects
+from lib.objects import objects
 from config.url_config import URLDB
 from earnings import *
 

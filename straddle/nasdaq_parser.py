@@ -1,3 +1,8 @@
+"""
+deprecated, use marketwatcher
+"""
+
+
 from HTMLParser import *
 from straddle.strategy import *
 import urllib2

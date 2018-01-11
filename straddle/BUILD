@@ -1,20 +1,15 @@
 py_library(
-  name="straddle_objects",
-  srcs=["objects.py"],
-  deps=[
-    "//util:misc"
-  ],
-)
-py_library(
   name="strategy_lib",
   srcs=["strategy.py"],
-  deps=["straddle_objects"]
+  deps=[
+    "//lib:objects",
+  ]
 )
 py_library(
   name="market_watcher_parser",
   srcs=["market_watcher_parser.py"],
   deps=[
-    "straddle_objects", 
+    "//lib:objects", 
     "strategy_lib",
     "//util:networks",
   ],
