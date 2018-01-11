@@ -32,3 +32,14 @@ py_library(
     "//:__pkg__",
   ],
 )
+py_library(
+  name="insider_parser",
+  src=["insider_parser.py"],
+  deps=[
+    "//util:networks",
+    "//lib:parser",
+  ],
+  visibility=[
+    "//:__pkg__",
+  ],
+)
