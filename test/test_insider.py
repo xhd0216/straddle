@@ -12,6 +12,7 @@ class insiderParser(myParser):
     self.table = []
     self.has_data = False
     self.last_symbol = ''
+    self.aggregated = dict()
   def handle_starttag(self, tag, attrs):
     self.tagOn(tag)
     if tag == 'td':
@@ -34,7 +35,18 @@ class insiderParser(myParser):
     self.tagOff(tag)
   def getTable(self):
     return self.table
-
+  def getAggregatedTable(self):
+    #sym = ''
+    #total_value = 0
+    #total_shares = 0
+    for i in self.table:
+      sym = i[0]
+      if sym not in self.aggregated:
+        self.aggregated[sym] = [0, 0]
+      d = self.aggregated[sym]
+      d[0] += i[3]
+      d[0] += i[5]
+    return self.aggregated
 def test_insider_page():
   ## s = 'http://www.insider-monitor.com/top10_insider_buys_week.html'
   f = open(os.path.join(os.path.dirname(__file__), 'insider.html'))
@@ -43,3 +55,6 @@ def test_insider_page():
   p = insiderParser()
   p.feed(g) 
   print p.getTable()
+  t = p.getAggregatedTable()
+  for i in t.keys():
+    print i, 'value:', t[i][1], 'shares:', t[i][0], 'price:', t[i][1]/t[i][0]
