@@ -8,5 +8,10 @@ setup(
     packages=find_packages(),
     package_data={
       '':['*.json', '*.html']
+    },
+    entry_points={
+      'console_scripts': [
+        'market_watcher_parser = straddle.market_watcher_parser:main'
+      ]
     }
 )

@@ -1,50 +1,85 @@
 from HTMLParser import HTMLParser
-import urllib2
-import ssl
 import os
+import ssl
+import urllib2
+
 from straddle.strategy import *
 from util.networks import *
-data_place_holder = '-'
-## example: index/vix, stock/aapl, fund/dust
-market_watcher_url = 'https://www.marketwatch.com/investing/%s/%s/options'
 
-table_headings=["Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt", "Strike", "Symbol", "Last", "Change", "Vol", "Bid", "Ask", "OpenInt"]
+DATA_PLACE_HOLDER = '-'
+
+## example: index/vix, stock/aapl, fund/dust
+MATKET_WATCHER_URL = 'https://www.marketwatch.com/investing/%s/%s/options'
+
+TABLE_HEADERS=["Symbol",
+               "Last",
+               "Change",
+               "Vol",
+               "Bid",
+               "Ask",
+               "OpenInt",
+               "Strike",
+               "Symbol",
+               "Last",
+               "Change",
+               "Vol",
+               "Bid",
+               "Ask",
+               "OpenInt"]
+
+
 def getCallAskIndex():
   return 5
+
+
 def getPutAskIndex():
   return 13
+
+
 def getCallBidIndex():
   return 4
+
+
 def getPutBidIndex():
   return 12
+
+
 def getStrikeIndex():
   return 7
+
+
 def getCallOpenIntIndex():
   return 6
+
+
 def getPutOpenIntIndex():
   return 14
+
+
 def getAttr(attrs, key):
   for x in attrs:
     if key == x[0]:
       return x[1]
   return None
 
+
 def getCallStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-            'strike':row[getStrikeIndex()],
-            'expiration':exp,
-            'call':True}
+           'strike':row[getStrikeIndex()],
+           'expiration':exp,
+           'call':True}
   oi = row[getCallOpenIntIndex()]
   ca = row[getCallAskIndex()]
   cb = row[getCallBidIndex()]
-  if oi != data_place_holder:
+  if oi != DATA_PLACE_HOLDER:
     miscc['open_int'] = oi
-  if ca != data_place_holder:
+  if ca != DATA_PLACE_HOLDER:
     miscc['ask'] = ca
-  if cb != data_place_holder:
+  if cb != DATA_PLACE_HOLDER:
     miscc['bid'] = cb
-  r = Strike(misc=miscc)
-  return r 
+  return Strike(misc=miscc)
+
+
 def getPutStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
             'strike':row[getStrikeIndex()],
@@ -53,25 +88,29 @@ def getPutStrikeInstance(symb, exp, row):
   oi = row[getPutOpenIntIndex()]
   ca = row[getPutAskIndex()]
   cb = row[getPutBidIndex()]
-  if oi != data_place_holder:
+  if oi != DATA_PLACE_HOLDER:
     miscc['open_int'] = oi
-  if ca != data_place_holder:
+  if ca != DATA_PLACE_HOLDER:
     miscc['ask'] = ca
-  if cb != data_place_holder:
+  if cb != DATA_PLACE_HOLDER:
     miscc['bid'] = cb
-  r = Strike(misc=miscc)
-  return r 
+  return Strike(misc=miscc)
+
+
 class MWFormParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
     self.form_links=[]
+
   def handle_starttag(self, tag, attrs):
     if tag == 'form':
       a = getAttr(attrs, 'action')
       if a != None:
         self.form_links.append(a)
+
   def getLinks(self):
     return self.form_links
+
 
 class MarketWatcherParser(HTMLParser):
   def __init__(self):
@@ -89,12 +128,20 @@ class MarketWatcherParser(HTMLParser):
     self.symbol = ''
     self.straddles = []
     self.bigger_straddle = False
+
+
   def getStraddles(self):
     return self.straddles
+
+
   def setSymbol(self, s):
     self.symbol = s
+
+
   def doXHRtable(self, b=True):
     self.begin_table=b
+
+
   def handle_starttag(self, tag, attrs):
     if tag == 'table':
       a = getAttr(attrs, 'class')
@@ -118,13 +165,15 @@ class MarketWatcherParser(HTMLParser):
       a = getAttr(attrs, 'class')
       if 'acenter' not in a:
         self.begin_cell = True
-      self.row.append(data_place_holder)
+      self.row.append(DATA_PLACE_HOLDER)
     elif tag == 'td':
       a = getAttr(attrs, 'colspan')
       if a != None:
         a = int(a)
-        if a > 10: # a == len(table_headings)
+        if a > 10: # a == len(TABLE_HEADERS)
           self.b_expire = True
+
+
   def handle_endtag(self, tag):
     if tag == 'table':
       self.begin_table = False
@@ -132,7 +181,7 @@ class MarketWatcherParser(HTMLParser):
       self.begin_row = False
       self.stock_price = False
       if self.begin_table:
-        if len(self.row) == len(table_headings):
+        if len(self.row) == len(TABLE_HEADERS):
           call = getCallStrikeInstance(self.symbol, self.expiration_date, self.row)
           put = getPutStrikeInstance(self.symbol, self.expiration_date, self.row)
           self.data.append(call)
@@ -147,6 +196,8 @@ class MarketWatcherParser(HTMLParser):
       self.begin_cell = False
     if tag == 'td' and self.b_expire:
       self.b_expire = False
+
+
   def handle_data(self, data):
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
@@ -165,12 +216,15 @@ class MarketWatcherParser(HTMLParser):
             st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
             self.straddles.append(st)
             self.bigger_straddle = True
+
+
   def getData(self):
     return self.data
 
+
 def getOptionMW(symbol='aapl'):
   symb = symbol
-  g = GetURL(market_watcher_url % ('stock', symb), encode=True)
+  g = GetURL(MATKET_WATCHER_URL % ('stock', symb), encode=True)
   if g == None:
     return
   p = MWFormParser()
@@ -185,4 +239,11 @@ def getOptionMW(symbol='aapl'):
     q.feed(g)
   for i in q.getStraddles():
     print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
-#getOptionMW()
+
+
+def main():
+  getOptionMW()
+
+ 
+if __name__ == '__main__':
+  main()
