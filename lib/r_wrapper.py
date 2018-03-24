@@ -28,4 +28,8 @@ for line in lines:
   if len(lin) > 1:
     res[lin[0].strip()] = float(lin[1])
 
-print res
+def greeks(arg_dicts):
+	""" wrapper to call greeks in R
+			input in an array of dicts
+	"""
+	p = Popen(["Rscript", "test.R"], stdout=PIPE)
