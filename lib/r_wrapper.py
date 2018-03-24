@@ -1,12 +1,6 @@
 from subprocess import Popen, PIPE
+import tempfile
 
-p = Popen(["Rscript", "test.R"], stdout=PIPE)
-
-output = p.communicate()
-rc = p.returncode
-
-if rc != 0:
-  exit(2)
 
 # the output should look like this:
 """
@@ -32,4 +26,17 @@ def greeks(arg_dicts):
 	""" wrapper to call greeks in R
 			input in an array of dicts
 	"""
+	new_file, filename = tempfile.mkstemp()
+
+	os.write(new_file, "this is some content")
+	os.close(new_file)
 	p = Popen(["Rscript", "test.R"], stdout=PIPE)
+
+	for arg in arg_dicts:
+		pass
+	output = p.communicate()
+	rc = p.returncode
+
+	if rc != 0:
+	  exit(2)
+
