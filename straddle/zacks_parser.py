@@ -1,9 +1,14 @@
+"""
+  get earning calendar from zacks
+"""
+
 from HTMLParser import *
+import json
+
 from util.misc import *
 from util.networks import *
 from straddle.earnings import *
 from straddle.market_watcher_parser import *
-import json
 
 
 zacks_heading = ['symbol', 'company', 'market-cap', 'time', 'estimate', 'reported', 'surprise', 'surprise-percent', 'price-change', 'report-camera']
@@ -29,17 +34,16 @@ def GetEarningsInRange(a, b):
       begin = s[index + 5:]
       end = begin.find('\"')
       symbol = begin[:end]
-      # print symbol
       # get eps
       e = i[4]
       # print e
       earn = earning()
       earn.setSymbol(symbol)
-      #print earn.data['symbol']
       earn.setEPS(e)
       earn.setDate(str(t))
+      print "==== got earning ===="
       print earn.__json__()
       getOptionMW(earn.getSymbol())
-    # print json.dumps(j, indent=3)
-    # go call the api, it should return a json object
+
+
 GetEarningsInRange(3,6)
