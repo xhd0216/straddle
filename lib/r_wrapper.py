@@ -30,7 +30,7 @@ def greeks(arg_dicts):
 
 	os.write(new_file, "this is some content")
 	os.close(new_file)
-	p = Popen(["Rscript", "test.R"], stdout=PIPE)
+	p = Popen(["Rscript", "greeks.R"], stdout=PIPE)
 
 	for arg in arg_dicts:
 		pass
