@@ -1,5 +1,5 @@
 import json
-from datetime import *
+import datetime
 from lib.objects import objects
 from util.misc import *
 
@@ -13,12 +13,12 @@ default_date_format = "%b %d, %Y" ## Nov 11, 2017
 
 strike_field = {'underlying':str, 
                 'strike':float,
-                'expiration':str,
+                'expiration':datetime.datetime,
                 'call':bool}
 strike_auxiliary = {'bid':float,
                     'ask':float,
                     'open_int':int,
-                    'query_time':datetime}
+                    'query_time':datetime.datetime}
 class Strike(objects):
   def __init__(self, 
         misc=None,
@@ -45,30 +45,26 @@ class Strike(objects):
       self.data['underlying'] = underlying
     if query_time != None:
       self.data['query_time'] = query_time
+    # change time
+    if not isinstance(self.data['expiration'], datetime.datetime):
+      print misc
+      self.data['expiration'] = datetime.datetime.strptime(self.data['expiration'], default_date_format)
     if 'query_time' not in self.data or self.data['query_time'] is None:
       self.data['query_time'] = datetime.datetime.now()
     if not self.isValid():
       self.data = None
+  def getTimeToExp(self):
+    return (self.getExpirationDate() - self.getKey('query_time')).days
   def getStrike(self):
     return self.getKey('strike')
   def isCall(self):
-    if not self.data or 'call' not in self.data or self.data['call'] == None:
-      return None
     return self.getKey('call')
   def getUnderlying(self):
     return self.getKey('underlying')
-  def getExpirationStr(self):
+  def getExpirationStr(self, format_str=default_date_format):
+    return datetime.datetime.strftime(self.getKey('expiration'), format_str)
+  def getExpirationDate(self):
     return self.getKey('expiration')
-  def getExpirationDate(self, fm=default_date_format):
-    s = self.getExpirationStr()
-    if s == None:
-      return None
-    try:
-      dt = datetime.datetime.strptime(s, fm)
-    except:
-      self.error = "wrong date time formate"
-      return None  
-    return dt
   def getAsk(self):
     return self.getKey('ask')
   def getBid(self):
@@ -77,7 +73,7 @@ class Strike(objects):
     a = self.getStrike()
     b = self.isCall()
     c = self.getUnderlying()
-    d = self.getExpirationDate()
+    d = self.getExpirationStr()
     if a == None or b == None or c == None or d == None:
       return None
     ### make quote to database

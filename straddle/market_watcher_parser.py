@@ -206,7 +206,7 @@ class MarketWatcherParser(HTMLParser):
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]
-      self.expiration_date = ddd
+      self.expiration_date = datetime.datetime.strptime(ddd, "%B %d, %Y")
     if self.begin_cell:
       if self.begin_row:
         ts = data.strip()
@@ -242,7 +242,7 @@ def getOptionMW(symbol='aapl'):
       continue
     q.feed(g)
   for i in q.getData():
-    print i.__json__()
+    print i.getTimeToExp()
 
 
 def main():
