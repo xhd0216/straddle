@@ -1,14 +1,9 @@
-###############################
-## deprecated, using zacks now
-###############################
+"""
+  yahoo earning parser is not used
+"""
 
-
-import urllib2
-from HTMLParser import *
-import json
 from lib.objects import objects
 from util.misc import isStrUnicode
-yahoo_earning_url = 'https://finance.yahoo.com/calendar/earnings'
 
 
 class earning(objects):
@@ -16,7 +11,6 @@ class earning(objects):
     objects.__init__(self)
     self.addRequiredField('symbol', str)
     # eps is not required, could be '-'
-    # self.addRequiredField('eps', float)
     if isinstance(misc, dict):
       for i in misc.keys():
         self.data[i] = misc[i]
@@ -38,6 +32,15 @@ class earning(objects):
     return self.getKey('EPS')
   def setDate(self, s):
     self.addKey('date', s)
+
+
+"""
+import urllib2
+from HTMLParser import *
+import json
+
+YAHOO_EARNING_URL = 'https://finance.yahoo.com/calendar/earnings'
+
 class earningParser(HTMLParser):
   def __init__(self):
     HTMLParser.__init__(self)
@@ -73,5 +76,4 @@ class earningParser(HTMLParser):
     self.data.sort(key=lambda e: e.getSymbol())
     js = '{\"data\":[' + ','.join([i.__json__() for i in self.data]) + ']}'
     return js
-
-
+"""

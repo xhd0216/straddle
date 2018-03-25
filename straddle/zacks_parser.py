@@ -6,23 +6,25 @@ from HTMLParser import *
 import json
 
 from util.misc import *
-from util.networks import *
-from straddle.earnings import *
-from straddle.market_watcher_parser import *
+from util.networks import GetURL
+from straddle.earnings import earning
 
 
-zacks_heading = ['symbol', 'company', 'market-cap', 'time', 'estimate', 'reported', 'surprise', 'surprise-percent', 'price-change', 'report-camera']
-zacks_api_url = 'https://www.zacks.com/includes/classes/z2_class_calendarfunctions_data.php?calltype=eventscal&date=%s&type=1&search_trigger=0'
+ZACKS_HEADING = ['symbol', 'company', 'market-cap', 'time', 'estimate', 'reported', 'surprise', 'surprise-percent', 'price-change', 'report-camera']
+ZACKS_API_URL = 'https://www.zacks.com/includes/classes/z2_class_calendarfunctions_data.php?calltype=eventscal&date=%s&type=1&search_trigger=0'
 
 def GetEarningsInRange(a, b):
+  """ get earning calendar """
   if not isinstance(a, int) or not isinstance(b, int):
     return []
-  r = []
-  d = getDayAfterRange(a, b)
-  for t in d:
-    url = zacks_api_url % str(getTimeSecond(t))
-    print url
+  res = []
+  date_array = getDayAfterRange(a, b)
+  for t in date_array:
+    url = ZACKS_API_URL % str(getTimeSecond(t))
     g = GetURL(url)
+    if g is None:
+      # failed to load page
+      continue
     j = json.loads(g)
     for i in j['data']:
       # get symbol
@@ -41,9 +43,14 @@ def GetEarningsInRange(a, b):
       earn.setSymbol(symbol)
       earn.setEPS(e)
       earn.setDate(str(t))
-      print "==== got earning ===="
-      print earn.__json__()
-      getOptionMW(earn.getSymbol())
+      res.append(earn)
+  return res
+      
+
+def main():
+  for earning in GetEarningsInRange(3,6):
+    print earning.__json__()
 
 
-GetEarningsInRange(3,6)
+if __name__ == '__main__':
+  main()
