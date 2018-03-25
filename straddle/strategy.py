@@ -17,14 +17,16 @@ strike_field = {'underlying':str,
                 'call':bool}
 strike_auxiliary = {'bid':float,
                     'ask':float,
-                    'open_int':int}
+                    'open_int':int,
+                    'query_time':datetime}
 class Strike(objects):
   def __init__(self, 
         misc=None,
         underlying=None, 
         strike=None, 
         expiration=None,  ## str
-        call=None):
+        call=None,
+				query_time=None):
     objects.__init__(self)
     self.fields = strike_field
     self.auxiliary = strike_auxiliary
@@ -41,6 +43,10 @@ class Strike(objects):
       self.data['call'] = call
     if underlying != None:
       self.data['underlying'] = underlying
+    if query_time != None:
+      self.data['query_time'] = query_time
+    if 'query_time' not in self.data or self.data['query_time'] is None:
+      self.data['query_time'] = datetime.datetime.now()
     if not self.isValid():
       self.data = None
   def getStrike(self):

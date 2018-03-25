@@ -1,3 +1,4 @@
+import argparse
 from HTMLParser import HTMLParser
 import os
 import ssl
@@ -65,7 +66,7 @@ def getAttr(attrs, key):
 
 def getCallStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-           'strike':row[getStrikeIndex()],
+           'strike':getStrike(row),
            'expiration':exp,
            'call':True}
   oi = getCallOpenInt(row)
@@ -82,7 +83,7 @@ def getCallStrikeInstance(symb, exp, row):
 
 def getPutStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-            'strike':row[getStrikeIndex()],
+            'strike':getStrike(row),
             'expiration':exp,
             'call':False}
   oi = getPutOpenInt(row)
@@ -240,13 +241,16 @@ def getOptionMW(symbol='aapl'):
     if g == None:
       continue
     q.feed(g)
-  #for i in q.getStraddles():
-  #  print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
   for i in q.getData():
-    print i
+    print i.__json__()
+
 
 def main():
-  getOptionMW()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--symbol', default='aapl')
+	opts = parser.parse_args()
+
+	getOptionMW(opts.symbol)
 
  
 if __name__ == '__main__':
