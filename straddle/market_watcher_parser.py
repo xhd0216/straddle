@@ -1,3 +1,4 @@
+import argparse
 from HTMLParser import HTMLParser
 import os
 import ssl
@@ -28,32 +29,32 @@ TABLE_HEADERS=["Symbol",
                "OpenInt"]
 
 
-def getCallAskIndex():
-  return 5
+def getCallAsk(row):
+  return row[5]
 
 
-def getPutAskIndex():
-  return 13
+def getPutAsk(row):
+  return row[13]
 
 
-def getCallBidIndex():
-  return 4
+def getCallBid(row):
+  return row[4]
 
 
-def getPutBidIndex():
-  return 12
+def getPutBid(row):
+  return row[12]
 
 
-def getStrikeIndex():
-  return 7
+def getStrike(row):
+  return row[7]
 
 
-def getCallOpenIntIndex():
-  return 6
+def getCallOpenInt(row):
+  return row[6]
 
 
-def getPutOpenIntIndex():
-  return 14
+def getPutOpenInt(row):
+  return row[14]
 
 
 def getAttr(attrs, key):
@@ -65,12 +66,12 @@ def getAttr(attrs, key):
 
 def getCallStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-           'strike':row[getStrikeIndex()],
+           'strike':getStrike(row),
            'expiration':exp,
            'call':True}
-  oi = row[getCallOpenIntIndex()]
-  ca = row[getCallAskIndex()]
-  cb = row[getCallBidIndex()]
+  oi = getCallOpenInt(row)
+  ca = getCallAsk(row)
+  cb = getCallBid(row)
   if oi != DATA_PLACE_HOLDER:
     miscc['open_int'] = oi
   if ca != DATA_PLACE_HOLDER:
@@ -82,12 +83,12 @@ def getCallStrikeInstance(symb, exp, row):
 
 def getPutStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-            'strike':row[getStrikeIndex()],
-            'expiration':exp,
-            'call':False}
-  oi = row[getPutOpenIntIndex()]
-  ca = row[getPutAskIndex()]
-  cb = row[getPutBidIndex()]
+           'strike':getStrike(row),
+           'expiration':exp,
+           'call':False}
+  oi = getPutOpenInt(row)
+  ca = getPutAsk(row)
+  cb = getPutBid(row)
   if oi != DATA_PLACE_HOLDER:
     miscc['open_int'] = oi
   if ca != DATA_PLACE_HOLDER:
@@ -182,15 +183,18 @@ class MarketWatcherParser(HTMLParser):
       self.stock_price = False
       if self.begin_table:
         if len(self.row) == len(TABLE_HEADERS):
-          call = getCallStrikeInstance(self.symbol, self.expiration_date, self.row)
-          put = getPutStrikeInstance(self.symbol, self.expiration_date, self.row)
+          call = getCallStrikeInstance(self.symbol,
+                                       self.expiration_date,
+                                       self.row)
+          put = getPutStrikeInstance(self.symbol,
+                                     self.expiration_date,
+                                     self.row)
           self.data.append(call)
           self.data.append(put)
           if self.bigger_straddle:
             self.bigger_straddle = False
             st = straddle(legs=[call, put], price=self.current_price)
             self.straddles.append(st)
-          ##print self.row
           self.row = []
     if tag == 'td' and self.begin_cell:
       self.begin_cell = False
@@ -202,8 +206,7 @@ class MarketWatcherParser(HTMLParser):
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]
-      self.expiration_date = ddd
-      ##print "*****", ddd, "*****"
+      self.expiration_date = datetime.datetime.strptime(ddd, "%B %d, %Y")
     if self.begin_cell:
       if self.begin_row:
         ts = data.strip()
@@ -213,7 +216,8 @@ class MarketWatcherParser(HTMLParser):
           self.current_price = float(data)
           ##print '=====', data, '====='
           if len(self.data) > 1:
-            st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
+            st = straddle(legs=[self.data[-1], self.data[-2]],
+                          price = self.current_price)
             self.straddles.append(st)
             self.bigger_straddle = True
 
@@ -237,12 +241,16 @@ def getOptionMW(symbol='aapl'):
     if g == None:
       continue
     q.feed(g)
-  for i in q.getStraddles():
-    print i.isValid(), i.getCurrentPrice(), i.getStraddlePrice(), i.getUnderlying(), i.getExpirationStr(), i.getStrike()
+  for i in q.getData():
+    print i.getTimeToExp()
 
 
 def main():
-  getOptionMW()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--symbol', default='aapl')
+	opts = parser.parse_args()
+
+	getOptionMW(opts.symbol)
 
  
 if __name__ == '__main__':

@@ -5,8 +5,8 @@ def GetURL(url, encode=False):
     f = urllib2.urlopen(url)
     g = f.read()
     f.close()
-  except:
-    print 'failed to open url', url
+  except Exception, msg:
+    print 'failed to open url', url, msg
     return None
   c = f.getcode()
   if c != 200:

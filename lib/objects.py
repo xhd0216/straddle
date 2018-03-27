@@ -9,7 +9,7 @@ class objects():
   def __json__(self, indent=None):
     if not self.isValid():
       return '{}'
-    return json.dumps(self.data, sort_keys=True, indent=indent)
+    return json.dumps(self.data, sort_keys=True, indent=indent, default=str)
   def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):
@@ -70,7 +70,7 @@ class objects():
       val = a
     self.data[key] = val
     return True
-  def addNoneRequiredField(self, key, tp, force=False):
+  def addNonRequiredField(self, key, tp, force=False):
     if not isinstance(key, str):
       return False
     if not isinstance(tp, type):

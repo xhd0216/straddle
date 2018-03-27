@@ -10,6 +10,7 @@ def isStrUnicode(a):
 ## return: (True, a) if input a is not type t, but has been coverted.
 ## return: (False, None) if input a is not type t, and cannot be converted.
 def fix_instance(a, t):
+  """ convert input a to type t """
   # if a is not an instance of t, try to fix it
   # return (ok, a) 
   # ok=False means cannot be fixed
