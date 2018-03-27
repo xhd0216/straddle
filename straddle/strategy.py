@@ -1,3 +1,6 @@
+import sys
+print sys.path
+
 import json
 import datetime
 from lib.objects import objects

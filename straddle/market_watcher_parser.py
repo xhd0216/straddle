@@ -227,15 +227,14 @@ class MarketWatcherParser(HTMLParser):
 
 
 def getOptionMW(symbol='aapl'):
-  symb = symbol
-  g = GetURL(MATKET_WATCHER_URL % ('stock', symb), encode=True)
+  g = GetURL(MATKET_WATCHER_URL % ('stock', symbol), encode=True)
   if g == None:
     return
   p = MWFormParser()
   p.feed(g)
   q = MarketWatcherParser()
   q.doXHRtable()
-  q.setSymbol(symb)
+  q.setSymbol(symbol)
   for u in p.getLinks():
     g = GetURL('https://www.marketwatch.com' + u)
     if g == None:
