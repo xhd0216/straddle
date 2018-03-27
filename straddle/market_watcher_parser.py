@@ -241,7 +241,7 @@ def getOptionMW(symbol='aapl'):
       continue
     q.feed(g)
   for i in q.getData():
-    print i.getTimeToExp()
+    print i.__json__()
 
 
 def main():
