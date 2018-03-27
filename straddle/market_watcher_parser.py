@@ -190,6 +190,7 @@ class MarketWatcherParser(HTMLParser):
             self.bigger_straddle = False
             st = straddle(legs=[call, put], price=self.current_price)
             self.straddles.append(st)
+          ##print self.row
           self.row = []
     if tag == 'td' and self.begin_cell:
       self.begin_cell = False
@@ -202,6 +203,7 @@ class MarketWatcherParser(HTMLParser):
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]
       self.expiration_date = ddd
+      ##print "*****", ddd, "*****"
     if self.begin_cell:
       if self.begin_row:
         ts = data.strip()
@@ -211,7 +213,7 @@ class MarketWatcherParser(HTMLParser):
           self.current_price = float(data)
           ##print '=====', data, '====='
           if len(self.data) > 1:
-            st = straddle(legs=[self.data[-1], self.data[-2]], price=self.current_price)
+            st = straddle(legs=[self.data[-1], self.data[-2]], price = self.current_price)
             self.straddles.append(st)
             self.bigger_straddle = True
 
@@ -221,15 +223,15 @@ class MarketWatcherParser(HTMLParser):
 
 
 def getOptionMW(symbol='aapl'):
-  g = GetURL(MATKET_WATCHER_URL % ('stock', symbol), encode=True)
+  symb = symbol
+  g = GetURL(MATKET_WATCHER_URL % ('stock', symb), encode=True)
   if g == None:
     return
-
   p = MWFormParser()
   p.feed(g)
   q = MarketWatcherParser()
   q.doXHRtable()
-  q.setSymbol(symbol)
+  q.setSymbol(symb)
   for u in p.getLinks():
     g = GetURL('https://www.marketwatch.com' + u)
     if g == None:
