@@ -14,9 +14,11 @@ class earning(objects):
     if isinstance(misc, dict):
       for i in misc.keys():
         self.data[i] = misc[i]
+
   def setSymbol(self, symbol):
     if isStrUnicode(symbol):
       self.data['symbol'] = symbol
+
   def setEPS(self, eps):
     try:
       a = float(eps)
@@ -24,12 +26,15 @@ class earning(objects):
       self.data['eps'] = None
       return
     self.data['eps'] = a
+
   def getSymbol(self):
     if self.isValid():
       return self.data['symbol']
     return None
+
   def getEPS(self):
     return self.getKey('EPS')
+
   def setDate(self, s):
     self.addKey('date', s)
 

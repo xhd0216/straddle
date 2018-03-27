@@ -15,10 +15,13 @@ strike_field = {'underlying':str,
                 'strike':float,
                 'expiration':datetime.datetime,
                 'call':bool}
+
 strike_auxiliary = {'bid':float,
                     'ask':float,
                     'open_int':int,
                     'query_time':datetime.datetime}
+
+
 class Strike(objects):
   def __init__(self, 
         misc=None,
@@ -26,7 +29,7 @@ class Strike(objects):
         strike=None, 
         expiration=None,  ## str
         call=None,
-				query_time=None):
+        query_time=None):
     objects.__init__(self)
     self.fields = strike_field
     self.auxiliary = strike_auxiliary
@@ -76,7 +79,7 @@ class Strike(objects):
     d = self.getExpirationStr()
     if a == None or b == None or c == None or d == None:
       return None
-    ### make quote to database
+    ## make quote to database
     return 1.0
   def getUnderlyingPrice(self):
     ud = self.getUnderlying()
@@ -141,6 +144,8 @@ class Strike(objects):
     elif a!= None:
       m = a
     return self.addKey('open_int', m)
+
+
 def parseStrike(s):
 	try:
 		a = json.loads(s)

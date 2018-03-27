@@ -83,9 +83,9 @@ def getCallStrikeInstance(symb, exp, row):
 
 def getPutStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
-            'strike':getStrike(row),
-            'expiration':exp,
-            'call':False}
+           'strike':getStrike(row),
+           'expiration':exp,
+           'call':False}
   oi = getPutOpenInt(row)
   ca = getPutAsk(row)
   cb = getPutBid(row)
