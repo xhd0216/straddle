@@ -215,7 +215,6 @@ class MarketWatcherParser(HTMLParser):
       if self.stock_price:
         if 'Current price' not in data:
           self.current_price = float(data)
-          ##print '=====', data, '====='
           if len(self.data) > 1:
             st = straddle(legs=[self.data[-1], self.data[-2]],
                           price = self.current_price)
@@ -250,12 +249,17 @@ def getOptionMW(symbol='aapl'):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', default='aapl')
-  parser.add_argument('--logfile', help='path to log file')
-  parser.add_argument('--logmode', default='a', help='file mode ("a", "w", etc.)')
-  parser.add_argument('--quiet', action='store_true', default=False, help='quiet')
+  parser.add_argument('--log-file', help='path to log file')
+  parser.add_argument('--log-mode', default='a', help='file mode ("a", "w", etc.)')
+  parser.add_argument('--log-level', default='debug')
   opts = parser.parse_args()
 
-  set_logger() 
+  
+
+  if opts.logfile:
+    set_logger(filename=opts.logfile, mode=opts.logmode)
+  else:
+    set_logger(level=logging.DEBUG, out=sys.stdout) 
 
   logging.info("in market")
   #getOptionMW(opts.symbol)
