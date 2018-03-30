@@ -15,14 +15,13 @@ ZACKS_API_URL = 'https://www.zacks.com/includes/classes/z2_class_calendarfunctio
 
 def GetEarningsInRange(a, b):
   """ get earning calendar """
-  if not isinstance(a, int) or not isinstance(b, int):
-    return []
   res = []
   date_array = getDayAfterRange(a, b)
   for t in date_array:
     url = ZACKS_API_URL % str(getTimeSecond(t))
     g = GetURL(url)
     if g is None:
+      logging.error("failed to date %s, url=%s", datetime.datetime.strftime(t, '%Y-%m-%d'), url) 
       # failed to load page
       continue
     j = json.loads(g)

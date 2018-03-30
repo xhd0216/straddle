@@ -1,68 +1,89 @@
+"""
+  base objects class
+"""
+
 import datetime
 import json
+import logging
 from util.misc import *
 
 
+DEFAULT_DATE_FORMAT_STR = '%Y-%m-%d'
+DEFAULT_TIME_FORMAT_STR = '%Y-%m-%d %H:%M'
+
 def obj_convert(o):
+  """ convert objects to json serializables """
   if isinstance(o, datetime.datetime):
-    return datetime.datetime.strftime(o, '%Y-%m-%d')
+    if o.hour == 0 and o.minute == 0:
+      # only print date
+      return datetime.datetime.strftime(o, DEFAULT_DATE_FORMAT_STR)
+    else:
+      return datetime.datetime.strftime(o, DEFAULT_TIME_FORMAT_STR)
   elif hasattr(o, 'data'):
     return o.data
   else:
     return str(o)
 
+
 class objects():
+  """ base objects class """
   def __init__(self):
     self.fields = dict()     # required fields, (key, type) must match
     self.auxiliary = dict()  # non-required fields, (key, type) must match
     self.data = dict()
-  def __json__(self, indent=None):
-    return json.dumps(self.data, sort_keys=True, indent=4, default=obj_convert)
-  def __validate__(self, k, required=True):
-    # validate single key
-    if not isinstance(k, str):
-      # invalid key
-      return False
-    if required and k not in self.fields:
-      # this key is not required
-      return k in self.data
-    if k not in self.data or self.data[k] == None:
-      # key is required but data is missing
+
+  def __json__(self, indent=4, sort_keys=True):
+    """ dump data to json file """
+    return json.dumps(self.data,
+                      sort_keys=sort_keys,
+                      indent=indent,
+                      default=obj_convert)
+
+  def __validate__(self, k, t, required=True):
+    """ validate a single key """
+    assert isinstance(k, str)
+    assert isinstance(t, type)
+
+    if k not in self.data:
+      logging.warning("key %s is not in data", k)
       return not required
-    if required:
-      b, a = fix_instance(self.data[k], self.fields[k])
-    else:
-      b, a = fix_instance(self.data[k], self.auxiliary[k])
+
+    b, a = fix_instance(self.data[k], t)
     if b == False:
-      return b
-    if a != None:
+      lowarning.error("type error")
+    elif a != None:
       # fix it.
       self.data[k] = a
-    return True
+    return b
+
   def isValid(self):
+    """ validate all keys in data """
     if self.data == None:
+      logging.error("no data")
       return False
-    for k in self.fields.keys():
-      if k not in self.data or self.data[k] == None:
-        print "key %s is missing" % k
+
+    for k in self.fields:
+      if k not in self.data:
+        logging.error("key %s is missing", k)
         return False
-      b = self.__validate__(k)
+      b = self.__validate__(k, self.fields[k])
       if not b:
-        print "wrong type for key %s" % k
+        logging.error("wrong type for key %s", k)
         return False
+
     for k in self.auxiliary.keys():
-      b = self.__validate__(k, required=False)
+      b = self.__validate__(k, self.auxiliary[k], required=False)
       if not b:
-        print "wrong type for key %s" % k
+        logging.error("wrong type for key %s", k)
         return False
     return True
+
   def getKey(self, key):
-    b = self.__validate__(key)
-    if b:
-      return self.data[key]
-    else:
-      return None
+    """ get key from data """
+    return self.data[key]
+
   def addKey(self, key, val, replace=True):
+    """ write (key, val) to data """
     b = True
     a = None
     if not replace and key in self.data:
@@ -78,27 +99,16 @@ class objects():
       val = a
     self.data[key] = val
     return True
-  def addNonRequiredField(self, key, tp, force=False):
-    if not isinstance(key, str):
-      return False
-    if not isinstance(tp, type):
-      return False
-    if key in self.fields:
-      # don't change key fields
-      return False
-    if key in self.auxiliary:
-      if force != True:
-        return False
-    self.auxiliary[key] = tp
-    return True
-  def addRequiredField(self, key, tp, force=False):
-    if not isinstance(key, str):
-      return False
-    if not isinstance(tp, type):
-      return False
-    if key in self.fields:
-      # field already set
-      if force != True:
-        return False
-    self.fields[key] = tp
-    return True
+
+  def addField(self, key, tp, required):
+    """ add a field """
+    assert isinstance(key, str)
+    assert isinstance(tp, type)
+    assert key not in self.data
+    assert key not in self.auxiliary
+    assert key not in self.fields
+
+    if not required:
+      self.auxiliary[key] = tp
+    else:
+      self.fields[key] = tp

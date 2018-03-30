@@ -1,11 +1,12 @@
 import argparse
 from HTMLParser import HTMLParser
 import os
-import ssl
+import sys
 import urllib2
 
 from straddle.strategy import *
 from util.networks import *
+from util.logger import set_logger
 
 DATA_PLACE_HOLDER = '-'
 
@@ -78,7 +79,7 @@ def getCallStrikeInstance(symb, exp, row):
     miscc['ask'] = ca
   if cb != DATA_PLACE_HOLDER:
     miscc['bid'] = cb
-  return Strike(misc=miscc)
+  return create_strike(misc=miscc)
 
 
 def getPutStrikeInstance(symb, exp, row):
@@ -95,7 +96,7 @@ def getPutStrikeInstance(symb, exp, row):
     miscc['ask'] = ca
   if cb != DATA_PLACE_HOLDER:
     miscc['bid'] = cb
-  return Strike(misc=miscc)
+  return create_strike(misc=miscc)
 
 
 class MWFormParser(HTMLParser):
@@ -238,6 +239,7 @@ def getOptionMW(symbol='aapl'):
   for u in p.getLinks():
     g = GetURL('https://www.marketwatch.com' + u)
     if g == None:
+      logging.error('failed to get url ', u)
       continue
     q.feed(g)
   for i in q.getData():
@@ -245,11 +247,13 @@ def getOptionMW(symbol='aapl'):
 
 
 def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--symbol', default='aapl')
-	opts = parser.parse_args()
+  set_logger(logging.INFO, sys.stdout)
 
-	getOptionMW(opts.symbol)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--symbol', default='aapl')
+  opts = parser.parse_args()
+
+  getOptionMW(opts.symbol)
 
  
 if __name__ == '__main__':

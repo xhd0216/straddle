@@ -120,8 +120,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
 def parse_strike(s):
   a = json.loads(s)
   return create_strike(a)
-  
-
+ 
 
 def parseStrike(s):
 	try:
@@ -133,7 +132,7 @@ def parseStrike(s):
 
 strategy_must = {
   "name":str,
-  "strikes":list,
+  "legs":list,
 }
 strategy_additional = {
   "underlying_price":float,
