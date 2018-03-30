@@ -13,7 +13,7 @@ def set_logger(level=logging.DEBUG, out=None, filename=None, mode='a'):
   
   formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s',
                                 '%Y-%m-%d %H:%M:%S')
-
+  
   if out in [sys.stdout, sys.stderr]:
     ## print log to stdout or stderr
     ch = logging.StreamHandler()
@@ -27,4 +27,3 @@ def set_logger(level=logging.DEBUG, out=None, filename=None, mode='a'):
     fh.setLevel(level)
     fh.setFormatter(formatter)
     root.addHandler(fh)
-  

@@ -238,7 +238,7 @@ def getOptionMW(symbol='aapl'):
   q.setSymbol(symbol)
   for u in p.getLinks():
     g = GetURL('https://www.marketwatch.com' + u)
-    if g == None:
+    if g is None:
       logging.error('failed to get url ', u)
       continue
     q.feed(g)
@@ -248,14 +248,17 @@ def getOptionMW(symbol='aapl'):
 
 
 def main():
-  set_logger(logging.INFO, sys.stdout)
-
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', default='aapl')
-  
+  parser.add_argument('--logfile', help='path to log file')
+  parser.add_argument('--logmode', default='a', help='file mode ("a", "w", etc.)')
+  parser.add_argument('--quiet', action='store_true', default=False, help='quiet')
   opts = parser.parse_args()
 
-  getOptionMW(opts.symbol)
+  set_logger() 
+
+  logging.info("in market")
+  #getOptionMW(opts.symbol)
 
  
 if __name__ == '__main__':
