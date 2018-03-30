@@ -1,3 +1,4 @@
+import datetime
 import json
 from util.misc import *
 
@@ -9,7 +10,11 @@ class objects():
   def __json__(self, indent=None):
     if not self.isValid():
       return '{}'
-    return json.dumps(self.data, sort_keys=True, indent=indent, default=str)
+    def dateconverter(o):
+      if isinstance(o, datetime.datetime):
+        return datetime.datetime.strftime(o, '%Y-%m-%d')
+      return str(o)
+    return json.dumps(self.data, sort_keys=True, indent=indent, default=dateconverter)
   def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):

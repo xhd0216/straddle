@@ -1,5 +1,7 @@
-import json
 import datetime
+import json
+import logging
+
 from lib.objects import objects
 from util.misc import *
 
@@ -19,131 +21,106 @@ strike_field = {'underlying':str,
 strike_auxiliary = {'bid':float,
                     'ask':float,
                     'open_int':int,
-                    'query_time':datetime.datetime}
+                    'query_time':datetime.datetime,
+                    'position':int}
 
 
 class Strike(objects):
-  def __init__(self, 
-        misc=None,
-        underlying=None, 
-        strike=None, 
-        expiration=None,  ## str
-        call=None,
-        query_time=None):
+  def __init__(self, misc):
     objects.__init__(self)
     self.fields = strike_field
     self.auxiliary = strike_auxiliary
-    self.error = None
     if isinstance(misc, dict):
       for k in misc.keys():
         self.data[k] = misc[k]
-    ## this four arguments overrides entries in misc
-    if strike != None:
-      self.data['strike'] = strike
-    if expiration != None:    
-      self.data['expiration'] = expiration
-    if call != None:
-      self.data['call'] = call
-    if underlying != None:
-      self.data['underlying'] = underlying
-    if query_time != None:
-      self.data['query_time'] = query_time
-    # change time
-    if not isinstance(self.data['expiration'], datetime.datetime):
-      print misc
-      self.data['expiration'] = datetime.datetime.strptime(self.data['expiration'], default_date_format)
-    if 'query_time' not in self.data or self.data['query_time'] is None:
-      self.data['query_time'] = datetime.datetime.now()
-    if not self.isValid():
-      self.data = None
+
   def getTimeToExp(self):
     return (self.getExpirationDate() - self.getKey('query_time')).days
+
   def getStrike(self):
     return self.getKey('strike')
+
   def isCall(self):
     return self.getKey('call')
+
   def getUnderlying(self):
     return self.getKey('underlying')
+
   def getExpirationStr(self, format_str=default_date_format):
     return datetime.datetime.strftime(self.getKey('expiration'), format_str)
+
   def getExpirationDate(self):
     return self.getKey('expiration')
+
   def getAsk(self):
     return self.getKey('ask')
+
   def getBid(self):
     return self.getKey('bid')
-  def getCurrentPrice(self):
-    a = self.getStrike()
-    b = self.isCall()
-    c = self.getUnderlying()
-    d = self.getExpirationStr()
-    if a == None or b == None or c == None or d == None:
-      return None
-    ## make quote to database
-    return 1.0
-  def getUnderlyingPrice(self):
-    ud = self.getUnderlying()
-    if ud == None:
-      return None
-    return 2.15
-  def hasPosition(self):
-    if not self.data or 'position' not in self.data or self.data['position'] == None:
-      return False
-    a = self.data['position']
-    if not isinstance(a, int):
-      try:
-        a = int(float(a))
-        self.data['position'] = a
-      except:
-        ## log this event
-        self.error = "invalid position"
-        self.data['position'] = None
-        return False
-    return True
+
   def getPosition(self):
-    if not self.hasPosition():
-      return None
-    return self.data['position']
+    return self.getKey('position')
+
   def setPosition(self, pos, diff=True):
-    ## set position and return new position
-    if self.data == None:
-      return None
-    a = pos
-    if not isinstance(a, int):
-      try:
-        a = int(float(a))
-      except:
-        return None
-    if not self.hasPosition():
-      self.data['position'] = a
-      return a
+    ## set position
+    assert isinstance(pos, int)
+    if diff:
+      if 'position' not in self.date:
+        self.data['position'] = 0
+      self.data['position'] += pos
     else:
-      if diff:
-        self.data['position'] += a
-      else:
-        self.data['position'] = a
-    return self.data 
+      self.data['position'] = pos 
+
   def setAsk(self, m):
-    b, a = fix_instance(m, float)
-    if not b:
-      m = 0.0
-    elif a != None:
-      m = a
     return self.addKey('ask', m) 
+
   def setBid(self, m):
-    b, a = fix_instance(m, float)
-    if not b:
-      m = 0.0
-    elif a != None:
-      m = a
     return self.addKey('bid', m)
+
   def setOpenInt(self, m):
-    b, a = fix_instance(m, int)
-    if not b:
-      m = 0
-    elif a!= None:
-      m = a
     return self.addKey('open_int', m)
+
+
+def create_strike(misc, underlying=None, strike=None, expiration=None,
+                  call=None, query_time=None):
+  """ create a strike """
+
+  # create dictionary
+  # 1, get all inputs (underlying, ...)
+  local = locals()
+  del local['misc']
+  # 2, create dictionary
+  res = misc if isinstance(misc, dict) else {}
+  # 3, update dictionary
+  for k in local:
+    if local[k] is not None:
+      res[k] = local[k]
+  # 4, check required fields
+  for k in strike_field:
+    if k not in res:
+      return None
+    if not isinstance(res[k], strike_field[k]):
+      b, a = fix_instance(res[k], strike_field[k])
+      if not b:
+        logging.error("field %s error %s", k, res[k]) 
+        return None
+      res[k] = a
+  # 5, check auxiliary fields
+  for k in strike_auxiliary:
+    if k in res and not isinstance(res[k], strike_auxiliray[k]):
+      a, b = fix_instance(res[k], strike_auxiliary[k])
+      if not b:
+        logging.error("field %s error %s", k, res[k]) 
+        return None
+      res[k] = a
+  # 6, return
+  return Strike(res)
+
+
+def parse_strike(s):
+  a = json.loads(s)
+  return create_strike(a)
+  
 
 
 def parseStrike(s):
@@ -170,10 +147,7 @@ class strategies(objects):
     self.auxiliary = strategy_additional
   def __json__(self):
     # TODO: this does not support indent in json print
-    s = "{\"name\":\"%s\", \"current_price\":%s, \"legs\":[" % (self.getName(), self.getUnderlyingPrice())
-    s += ','.join([i.__json__() for i in self.getLegs()]) 
-    s += "]}"
-    return s
+    return json.dumps({'name':self.getName(), 'legs':self.getStrikes()}, indent=4, default=str)
   def getName(self):
     return self.getKey('name')
   def getStrikes(self):

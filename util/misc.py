@@ -3,6 +3,31 @@ import datetime
 def isStrUnicode(a):
   return isinstance(a, str) or isinstance(a, unicode)
 
+
+# date formats that are supported
+date_formats = ['%Y-%m-%d',
+                '%b %d, %Y',
+                '%B %d, %Y',
+                '%Y%m%d']
+def fix_date(a):
+  """ convert a str or int to date """
+  if isStrUnicode(a):
+    for df in date_formats:
+      try:
+        res = datetime.datetime.strptime(a, df)
+      except:
+        pass
+      else:
+        return res
+  elif isinstance(a, int):
+    # case 1, unix epoch time 1522387739
+    if a > 1022387739:
+      return datetime.datetime.fromtimestamp(a)
+    elif a > 10000101 and a <= 99991231:
+      return datetime.datetime(a / 10000, (a/100)%100, a % 100)
+  return None
+
+
 ## give a value *a* and a type *t*
 ## check if a is of type t
 ## if not, try to convert a to type t
@@ -55,6 +80,12 @@ def fix_instance(a, t):
           a = a.replace(',','')
       a = float(a)
     except:
+      return False, None
+  elif t == datetime.datetime:
+    res = fix_date(a)
+    if res:
+      a = res
+    else:
       return False, None
   else:
     return False, None

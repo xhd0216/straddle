@@ -5,7 +5,7 @@
 import datetime
 import logging
 
-from strategy import Strike, strategies
+from strategy import Strike, strategies, create_strike
 
 class IronCondor(strategies):
   def __init__(self, legs):
@@ -13,13 +13,13 @@ class IronCondor(strategies):
     self.data['name'] = 'Iron Condor'
     self.data['strikes'] = legs
 
-  @classmethod
+  @staticmethod
   def create(legs):
     """ create an iron condor strategy """
     assert len(legs) == 4
 
     for i in range(4):
-      if legs[i].getExpirationDate() != self.getExpirationDate():
+      if legs[i].getExpirationDate() != legs[0].getExpirationDate():
         logging.error('all legs should have same expiration date')
         return None
       if not legs[i].isCall():
@@ -49,15 +49,16 @@ class IronCondor(strategies):
     """ get expiration date of the strategy """
     return self.getStrikes()[0].getExpirationDate()
 
+
 def create_iron_condor(strikes, underlying, expiration):
   """ given four strikes prices, return iron condor strategy """
   assert len(strikes) == 4
   misc = dict()
   misc['underlying'] = underlying
   misc['expiration'] = expiration
-  legs = [Strike(misc = misc, call=i==0 or i==3, strike=strikes[i]) for i in range(4)]
+  legs = [create_strike(misc = misc, call=True, strike=strikes[i]) for i in range(4)]
   return IronCondor.create(legs)
 
 if __name__ == '__main__':
-  a = create_iron_condor([23, 25, 27, 29], 'aapl', datetime.datetime.now())
-  print a is None
+  a = create_iron_condor([23, 25, 27, 29], 'aapl', '2018-04-20')
+  print a.__json__()
