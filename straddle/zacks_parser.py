@@ -4,6 +4,7 @@
 
 from HTMLParser import *
 import json
+import logging
 
 from util.misc import *
 from util.networks import GetURL
@@ -47,6 +48,7 @@ def GetEarningsInRange(a, b):
       
 
 def main():
+  logging.info("in zacks")
   for earning in GetEarningsInRange(3,6):
     print earning.__json__()
 

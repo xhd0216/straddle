@@ -84,7 +84,6 @@ class Strike(objects):
 def create_strike(misc, underlying=None, strike=None, expiration=None,
                   call=None, query_time=None):
   """ create a strike """
-
   # create dictionary
   # 1, get all inputs (underlying, ...)
   local = locals()
@@ -107,8 +106,8 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
       res[k] = a
   # 5, check auxiliary fields
   for k in strike_auxiliary:
-    if k in res and not isinstance(res[k], strike_auxiliray[k]):
-      a, b = fix_instance(res[k], strike_auxiliary[k])
+    if k in res and not isinstance(res[k], strike_auxiliary[k]):
+      b, a = fix_instance(res[k], strike_auxiliary[k])
       if not b:
         logging.error("field %s error %s", k, res[k]) 
         return None

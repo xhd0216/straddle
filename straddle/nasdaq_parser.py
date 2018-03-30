@@ -77,6 +77,8 @@ class nasdaqParser(HTMLParser):
     return js
   def getData(self):
     return self.data
+
+
 def get_strike_list(symbol):
   f = urllib2.urlopen(s % symbol)
   g = f.read()
@@ -90,13 +92,18 @@ def get_strike_list(symbol):
       miscc['bid'] = i[3]
     if i[4] != '-':
       miscc['ask'] = i[4]
-    call = Strike(misc=miscc)
+    call = create_strike(misc=miscc)
     r.append(call)
     miscp = {'underlying':symbol, 'strike':i[8], 'expiration':i[9], 'call':False, 'open_int':i[15]}
     if i[12] != '-':
       miscp['bid'] = i[12]
     if i[13] != '-':
       miscp['ask'] = i[13]
-    put = Strike(misc=miscp)
+    put = create_strike(misc=miscp)
     r.append(put)
   return r
+
+if __name__ == '__main__':
+  res = get_strike_list('aapl')
+  for r in res:
+    print r.__json__()

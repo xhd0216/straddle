@@ -243,7 +243,8 @@ def getOptionMW(symbol='aapl'):
       continue
     q.feed(g)
   for i in q.getData():
-    print i.__json__()
+    if i is None:
+      print "======="
 
 
 def main():
@@ -251,6 +252,7 @@ def main():
 
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', default='aapl')
+  
   opts = parser.parse_args()
 
   getOptionMW(opts.symbol)

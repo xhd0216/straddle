@@ -1,7 +1,6 @@
 """
   base objects class
 """
-
 import datetime
 import json
 import logging

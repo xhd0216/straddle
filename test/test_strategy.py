@@ -1,6 +1,7 @@
-from straddle.strategy import *
 import json
 from datetime import datetime, date, time
+
+from straddle.strategy import *
 
 def get_json_dict(o):
   assert hasattr(o, "__json__")

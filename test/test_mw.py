@@ -1,5 +1,7 @@
-from straddle.market_watcher_parser import *
 import os
+
+from straddle.market_watcher_parser import *
+
 
 def test_empty_page():
   f = open(os.path.join(os.path.dirname(__file__), 'market_watch_empty.html'))

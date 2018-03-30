@@ -32,11 +32,6 @@ class Strangle(strategies):
       return None
     return Strangle(legs, price)
   
-  def getTargetReturn(self):
-    """ get the target return at expiration """
-    legs = self.getStrikes()
-    return legs[1].getStrike() - legs[0].getStrike()
-
   def getBuyPrice(self):
     """ return the price to BUY this strategy """
     legs = self.getStrikes()
