@@ -13,8 +13,8 @@ test:
 	$(binpath)/pytest
 clean:
 	rm -rf $(vepath)
-	find . -name "*.pyc" | xargs rm
-	find . -name "__pycache__" | xargs rm -rf
+	find . -name "*.pyc" | xargs -r rm
+	find . -name "__pycache__" | xargs -r rm -rf
 	rm -f MANIFEST
 	rm -rf *.egg-info/
 	rm -rf dist/
