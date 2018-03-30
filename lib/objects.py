@@ -2,19 +2,22 @@ import datetime
 import json
 from util.misc import *
 
+
+def obj_convert(o):
+  if isinstance(o, datetime.datetime):
+    return datetime.datetime.strftime(o, '%Y-%m-%d')
+  elif hasattr(o, 'data'):
+    return o.data
+  else:
+    return str(o)
+
 class objects():
   def __init__(self):
     self.fields = dict()     # required fields, (key, type) must match
     self.auxiliary = dict()  # non-required fields, (key, type) must match
     self.data = dict()
   def __json__(self, indent=None):
-    if not self.isValid():
-      return '{}'
-    def dateconverter(o):
-      if isinstance(o, datetime.datetime):
-        return datetime.datetime.strftime(o, '%Y-%m-%d')
-      return str(o)
-    return json.dumps(self.data, sort_keys=True, indent=indent, default=dateconverter)
+    return json.dumps(self.data, sort_keys=True, indent=4, default=obj_convert)
   def __validate__(self, k, required=True):
     # validate single key
     if not isinstance(k, str):

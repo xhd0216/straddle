@@ -145,9 +145,6 @@ class strategies(objects):
     objects.__init__(self)
     self.fields = strategy_must
     self.auxiliary = strategy_additional
-  def __json__(self):
-    # TODO: this does not support indent in json print
-    return json.dumps({'name':self.getName(), 'legs':self.getStrikes()}, indent=4, default=str)
   def getName(self):
     return self.getKey('name')
   def getStrikes(self):
