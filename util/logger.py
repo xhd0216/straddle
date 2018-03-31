@@ -1,28 +1,20 @@
 import logging
 import sys
 
-class Color(Enum):
-    red = 'red'
-    blue = 'blue'
-    green = 'green'
+LOG_OPTIONS = {
+    'info': logging.INFO,
+    'debug': logging.DEBUG,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'critical': logging.CRITICAL,
+}
 
-    def __str__(self):
-        return self.value
-
-parser = ArgumentParser()
-parser.add_argument('color', type=Color, choices=list(Color))
-
-
-def set_logger(level=logging.DEBUG, out=None, filename=None, mode='a'):
-  assert level in [logging.DEBUG,
-                   logging.INFO,
-                   logging.WARNING,
-                   logging.ERROR,
-                   logging.CRITICAL]
-  
+def set_logger(level='debug', out=None, filename=None, mode='a'):
+  assert level in LOG_OPTIONS
+ 
   logger = logging.getLogger()
-  logger.setLevel(level)
-  
+  logger.setLevel(LOG_OPTIONS[level])
+
   formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s',
                                 '%Y-%m-%d %H:%M:%S')
   if out is None:
@@ -30,16 +22,13 @@ def set_logger(level=logging.DEBUG, out=None, filename=None, mode='a'):
   elif out in [sys.stdout, sys.stderr]:
     ## print log to stdout or stderr
     ch = logging.StreamHandler(out)
-    ch.setLevel(level)
+    ch.setLevel(LOG_OPTIONS[level])
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-  else:
-    print "here"
-    logger.propagate = False
   
   if filename:
     ## print log to file
     fh = logging.FileHandler(filename=filename, mode=mode)
-    fh.setLevel(level)
+    fh.setLevel(LOG_OPTIONS[level])
     fh.setFormatter(formatter)
     logger.addHandler(fh)

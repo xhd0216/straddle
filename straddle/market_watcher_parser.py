@@ -241,27 +241,24 @@ def getOptionMW(symbol='aapl'):
       logging.error('failed to get url ', u)
       continue
     q.feed(g)
-  for i in q.getData():
-    if i is None:
-      print "======="
+  return q.getData():
 
 
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', default='aapl')
-  parser.add_argument('--log-file', help='path to log file')
-  parser.add_argument('--log-mode', default='a', help='file mode ("a", "w", etc.)')
-  parser.add_argument('--log-level', default='debug')
-  opts = parser.parse_args()
-
+  parser.add_argument('--log-file', help='log file')
+  parser.add_argument('--log-mode', default='a',
+                      help='log file mode (a or w)')
+  parser.add_argument('--log-level', default='debug',help='log level')
   
-
-  if opts.logfile:
-    set_logger(filename=opts.logfile, mode=opts.logmode)
+  opts = parser.parse_args()
+  if opts.log_file:
+    set_logger(level=opts.log_level, filename=opts.log_file,
+               mode=opts.log_mode)
   else:
-    set_logger(level=logging.DEBUG, out=sys.stdout) 
+    set_logger(level=opts.log_level, out=sys.stdout) 
 
-  logging.info("in market")
   #getOptionMW(opts.symbol)
 
  
