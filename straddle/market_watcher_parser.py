@@ -229,7 +229,9 @@ class MarketWatcherParser(HTMLParser):
 def getOptionMW(symbol='aapl'):
   g = GetURL(MATKET_WATCHER_URL % ('stock', symbol), encode=True)
   if g == None:
+    logging.error('failed to get market watcher page')
     return
+
   p = MWFormParser()
   p.feed(g)
   q = MarketWatcherParser()
@@ -241,7 +243,7 @@ def getOptionMW(symbol='aapl'):
       logging.error('failed to get url ', u)
       continue
     q.feed(g)
-  return q.getData():
+  return q.getData()
 
 
 def main():
