@@ -98,45 +98,6 @@ def getStrikeInstance(symb, exp, price, call, row):
     miscc['last'] = cl
   return create_strike(misc=miscc)
   
-def getCallStrikeInstance(symb, exp, row):
-  miscc = {'underlying':symb,
-           'strike':getStrike(row),
-           'expiration':exp,
-           'call':True}
-  oi = getCallOpenInt(row)
-  ca = getCallAsk(row)
-  cb = getCallBid(row)
-  cl = getCallLast(row)
-  if oi != DATA_PLACE_HOLDER and oi != '':
-    miscc['open_int'] = oi
-  if ca != DATA_PLACE_HOLDER and ca != '':
-    miscc['ask'] = ca
-  if cb != DATA_PLACE_HOLDER and cb != '':
-    miscc['bid'] = cb
-  if cl != DATA_PLACE_HOLDER and cl != '':
-    miscc['last'] = cl
-  return create_strike(misc=miscc)
-
-
-def getPutStrikeInstance(symb, exp, row):
-  miscc = {'underlying':symb,
-           'strike':getStrike(row),
-           'expiration':exp,
-           'call':False}
-  oi = getPutOpenInt(row)
-  ca = getPutAsk(row)
-  cb = getPutBid(row)
-  cl = getPutLast(row)
-  if oi != DATA_PLACE_HOLDER and oi != '':
-    miscc['open_int'] = oi
-  if ca != DATA_PLACE_HOLDER and ca != '':
-    miscc['ask'] = ca
-  if cb != DATA_PLACE_HOLDER and cb != '':
-    miscc['bid'] = cb
-  if cl != DATA_PLACE_HOLDER and cl != '':
-    miscc['last'] = cl
-  return create_strike(misc=miscc)
-
 
 class MWFormParser(HTMLParser):
   def __init__(self):
