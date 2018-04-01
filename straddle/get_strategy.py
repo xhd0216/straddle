@@ -37,16 +37,16 @@ def data_preprocessing(data_in,
   """ prem out unused data and sort them by date """
   tmp_list = filter_date_range(data_in, date_range[0], date_range[1])
 
-  res = [{}] * 2 # res[0] is for put, res[1] is for call
+  res = [{}, {}] # res[0] is for all put, res[1] is for all call
   for tmp in tmp_list:
     ds = tmp.getExpirationStr()
     ic = tmp.isCall()
     if ds not in res[ic]:
-      res[ic] = []
-    res[ic].append(tmp)
+      res[ic][ds]= []
+    res[ic][ds].append(tmp)
   for cp in range(2):
-    for key in res[cp]:
-      res[key] = filter_price_range(res[key], price_range[0], price_range[1])
+    for key in res[cp]: ## expiration dates
+      res[cp][key] = filter_price_range(res[cp][key], price_range[0], price_range[1])
 
   return res
 
@@ -80,16 +80,16 @@ def main():
     # getOptionMW may return None because of page open failure
     logging.error('no data retrieved')
     return
+  logging.info('%d data received', len(res))
 
   # data preprocessing
   # step 1, filter the time range
-  data = data_preprocessing(res, [10, 30], [100, 200])
+  data = data_preprocessing(res, [10, 30], [160, 170])
   # print all calls
-  for k in data[0]:
+  for k in sorted(data[1].keys()):
     print "=====", k, "====="
-    for s in data[0][k]:
+    for s in data[1][k]:
       print s.__json__()
-
 
 
 if __name__ == '__main__':

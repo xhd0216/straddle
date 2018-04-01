@@ -30,6 +30,14 @@ TABLE_HEADERS=["Symbol",
                "OpenInt"]
 
 
+def getCallLast(row):
+  return row[1]
+
+
+def getPutLast(row):
+  return row[9]
+
+
 def getCallAsk(row):
   return row[5]
 
@@ -64,7 +72,32 @@ def getAttr(attrs, key):
       return x[1]
   return None
 
-
+def getStrikeInstance(symb, exp, price, call, row):
+  miscc = {'underlying':symb,
+           'strike':getStrike(row),
+           'expiration':exp,
+           'price':price,
+           'call':call}
+  if call:
+    oi = getCallOpenInt(row)
+    ca = getCallAsk(row)
+    cb = getCallBid(row)
+    cl = getCallLast(row)
+  else:
+    oi = getCallOpenInt(row)
+    ca = getCallAsk(row)
+    cb = getCallBid(row)
+    cl = getCallLast(row)
+  if oi != DATA_PLACE_HOLDER and oi != '':
+    miscc['open_int'] = oi
+  if ca != DATA_PLACE_HOLDER and ca != '':
+    miscc['ask'] = ca
+  if cb != DATA_PLACE_HOLDER and cb != '':
+    miscc['bid'] = cb
+  if cl != DATA_PLACE_HOLDER and cl != '':
+    miscc['last'] = cl
+  return create_strike(misc=miscc)
+  
 def getCallStrikeInstance(symb, exp, row):
   miscc = {'underlying':symb,
            'strike':getStrike(row),
@@ -73,12 +106,15 @@ def getCallStrikeInstance(symb, exp, row):
   oi = getCallOpenInt(row)
   ca = getCallAsk(row)
   cb = getCallBid(row)
-  if oi != DATA_PLACE_HOLDER:
+  cl = getCallLast(row)
+  if oi != DATA_PLACE_HOLDER and oi != '':
     miscc['open_int'] = oi
-  if ca != DATA_PLACE_HOLDER:
+  if ca != DATA_PLACE_HOLDER and ca != '':
     miscc['ask'] = ca
-  if cb != DATA_PLACE_HOLDER:
+  if cb != DATA_PLACE_HOLDER and cb != '':
     miscc['bid'] = cb
+  if cl != DATA_PLACE_HOLDER and cl != '':
+    miscc['last'] = cl
   return create_strike(misc=miscc)
 
 
@@ -90,12 +126,15 @@ def getPutStrikeInstance(symb, exp, row):
   oi = getPutOpenInt(row)
   ca = getPutAsk(row)
   cb = getPutBid(row)
-  if oi != DATA_PLACE_HOLDER:
+  cl = getPutLast(row)
+  if oi != DATA_PLACE_HOLDER and oi != '':
     miscc['open_int'] = oi
-  if ca != DATA_PLACE_HOLDER:
+  if ca != DATA_PLACE_HOLDER and ca != '':
     miscc['ask'] = ca
-  if cb != DATA_PLACE_HOLDER:
+  if cb != DATA_PLACE_HOLDER and cb != '':
     miscc['bid'] = cb
+  if cl != DATA_PLACE_HOLDER and cl != '':
+    miscc['last'] = cl
   return create_strike(misc=miscc)
 
 
@@ -130,6 +169,11 @@ class MarketWatcherParser(HTMLParser):
     self.symbol = ''
     self.straddles = []
     self.bigger_straddle = False
+    self.last_price = 0.0
+    self.last_price_tag = False
+
+  def getLastUnderlyingPrice(self):
+    return self.last_price
 
 
   def getStraddles(self):
@@ -168,6 +212,8 @@ class MarketWatcherParser(HTMLParser):
       if 'acenter' not in a:
         self.begin_cell = True
       self.row.append(DATA_PLACE_HOLDER)
+      if a is not None and 'strike-col' in a and 'important' in a:
+          self.last_price_tag = True
     elif tag == 'td':
       a = getAttr(attrs, 'colspan')
       if a != None:
@@ -184,12 +230,16 @@ class MarketWatcherParser(HTMLParser):
       self.stock_price = False
       if self.begin_table:
         if len(self.row) == len(TABLE_HEADERS):
-          call = getCallStrikeInstance(self.symbol,
-                                       self.expiration_date,
-                                       self.row)
-          put = getPutStrikeInstance(self.symbol,
-                                     self.expiration_date,
-                                     self.row)
+          call = getStrikeInstance(self.symbol,
+                                   self.expiration_date,
+                                   self.last_price,
+                                   True,
+                                   self.row)
+          put = getStrikeInstance(self.symbol,
+                                  self.expiration_date,
+                                  self.last_price,
+                                  False,
+                                  self.row)
           self.data.append(call)
           self.data.append(put)
           if self.bigger_straddle:
@@ -197,13 +247,18 @@ class MarketWatcherParser(HTMLParser):
             st = straddle(legs=[call, put], price=self.current_price)
             self.straddles.append(st)
           self.row = []
-    if tag == 'td' and self.begin_cell:
-      self.begin_cell = False
-    if tag == 'td' and self.b_expire:
-      self.b_expire = False
+    if tag == 'td':
+      if self.begin_cell:
+        self.begin_cell = False
+      if self.b_expire:
+        self.b_expire = False
+      if self.last_price_tag:
+        self.last_price_tag = False
 
 
   def handle_data(self, data):
+    if self.last_price_tag:
+      self.last_price = float(data)
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]

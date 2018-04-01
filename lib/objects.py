@@ -79,6 +79,8 @@ class objects():
 
   def getKey(self, key):
     """ get key from data """
+    if key not in self.data:
+      return None
     return self.data[key]
 
   def addKey(self, key, val, replace=True):

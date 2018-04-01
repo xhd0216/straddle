@@ -16,10 +16,12 @@ default_date_format = "%b %d, %Y" ## Nov 11, 2017
 strike_field = {'underlying':str, 
                 'strike':float,
                 'expiration':datetime.datetime,
+                'price':float,
                 'call':bool}
 
 strike_auxiliary = {'bid':float,
                     'ask':float,
+                    'last':float,
                     'open_int':int,
                     'query_time':datetime.datetime,
                     'position':int}
@@ -35,7 +37,10 @@ class Strike(objects):
         self.data[k] = misc[k]
 
   def getTimeToExp(self):
-    return (self.getExpirationDate() - self.getKey('query_time')).days
+    current = self.getKey('query_time')
+    if current is None:
+      current = datetime.datetime.now()
+    return (self.getExpirationDate() - current).days
 
   def getStrike(self):
     return self.getKey('strike')
@@ -101,7 +106,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
     if not isinstance(res[k], strike_field[k]):
       b, a = fix_instance(res[k], strike_field[k])
       if not b:
-        logging.error("field %s error %s", k, res[k]) 
+        logging.error("required field %s error %s", k, res[k]) 
         return None
       res[k] = a
   # 5, check auxiliary fields
@@ -109,7 +114,8 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
     if k in res and not isinstance(res[k], strike_auxiliary[k]):
       b, a = fix_instance(res[k], strike_auxiliary[k])
       if not b:
-        logging.error("field %s error %s", k, res[k]) 
+        logging.error("auxiliary field %s error %s", k, res)
+        assert 0
         return None
       res[k] = a
   # 6, return
