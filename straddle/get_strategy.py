@@ -32,11 +32,11 @@ def filter_strikes_list(strike_array, price_array):
 
 
 def data_preprocessing(data_in,
-                       date_range, 
+                       date_range,
                        price_range):
   """ prem out unused data and sort them by date """
   tmp_list = filter_date_range(data_in, date_range[0], date_range[1])
-  
+
   res = [{}] * 2 # res[0] is for put, res[1] is for call
   for tmp in tmp_list:
     ds = tmp.getExpirationStr()
@@ -47,9 +47,8 @@ def data_preprocessing(data_in,
   for cp in range(2):
     for key in res[cp]:
       res[key] = filter_price_range(res[key], price_range[0], price_range[1])
-  
-  return res 
-    
+
+  return res
 
 
 def main():
@@ -66,7 +65,7 @@ def main():
   parser.add_argument('--log-mode', default='a',
                       help='log file mode (a or w)')
   parser.add_argument('--log-level', default='debug',help='log level')
-  
+
   opts = parser.parse_args()
   if opts.log_file:
     set_logger(level=opts.log_level, filename=opts.log_file,
@@ -79,15 +78,19 @@ def main():
   res = getOptionMW(opts.symbol)
   if res is None:
     # getOptionMW may return None because of page open failure
+    logging.error('no data retrieved')
     return
 
   # data preprocessing
   # step 1, filter the time range
   data = data_preprocessing(res, [10, 30], [100, 200])
+  # print all calls
   for k in data[0]:
-    print k, data[0][k]
-   
-  
-  
+    print "=====", k, "====="
+    for s in data[0][k]:
+      print s.__json__()
+
+
+
 if __name__ == '__main__':
   main()

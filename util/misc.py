@@ -23,6 +23,7 @@ def fix_date(a):
     # case 1, unix epoch time 1522387739
     if a > 1022387739:
       return datetime.datetime.fromtimestamp(a)
+    # case 2, YYYYMMDD
     elif a > 10000101 and a <= 99991231:
       return datetime.datetime(a / 10000, (a/100)%100, a % 100)
   return None
@@ -40,9 +41,8 @@ def fix_instance(a, t):
   # return (ok, a) 
   # ok=False means cannot be fixed
   # ok=True means it is fixed, a is return; OR, a is an instance of t, needs not to fix
-  if not isinstance(t, type):
-    print "input error: needs a type"
-    return False, None
+  assert isinstance(t, type)
+
   if isinstance(a, t):
     return True, None
   # try to fix it
@@ -94,36 +94,28 @@ def fix_instance(a, t):
 date_origin = datetime.date(1970, 1, 1)
 
 def getRoundDate(d):
-  try:
-    r =  datetime.date(d.year, d.month, d.day)
-  except:
-    print "format error"
-    return None
-  return r
-# return today's date
+  """ given a datetime, return only the date """
+  assert isinstance(d, datetime.datetime)
+  return datetime.date(d.year, d.month, d.day)
+
 def getNowDate():
+  """ return today's date """
   now = datetime.datetime.now()
   return getRoundDate(now)
 
-# give a date (or datetime), return the seconds (of the date, not time)
 def getTimeSecond(date):
-  try: 
-    t = getRoundDate(date)
-    r = (t - date_origin).total_seconds()
-  except:
-    return None
+  """ give a date (or datetime), return the seconds (of the date, no time) """
+  t = getRoundDate(date)
+  r = (t - date_origin).total_seconds()
   return int(r)
 
-# return the seconds of some days after today
 def getDayAfter(days):
-  if not isinstance(days, int):
-    return None      
+  """ return the seconds of some days after today """
   return getTimeSecond(getNowDate() + datetime.timedelta(days=days))
 
-# get a range of days in range(a,b) = [a,b), in seconds.
 def getDayAfterRange(a, b):
+  """ get a range of days in range(a,b) = [a,b), in seconds. """
   if not isinstance(a, int) or not isinstance(b, int):
     return []
   r = getNowDate()                           
   return [r + datetime.timedelta(days=i) for i in range(a,b)]
-  

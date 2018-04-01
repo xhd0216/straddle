@@ -12,7 +12,11 @@ setup(
     entry_points={
       'console_scripts': [
         'getOptionsPrices = straddle.market_watcher_parser:main',
-        'getEarningCalendar = straddle.zacks_parser:main'
+        'getEarningCalendar = straddle.zacks_parser:main',
+        'getStrategy = straddle.get_strategy:main'
       ]
-    }
+    },
+    install_requires=[
+      'argparse',
+    ]
 )
