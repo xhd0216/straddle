@@ -18,7 +18,7 @@ setup(
     },
     install_requires=[
       'argparse',
-      'MySQL-python',
+      #'MySQL-python',
       'sqlalchemy',
     ]
 )
