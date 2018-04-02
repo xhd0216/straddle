@@ -1,1 +1,1 @@
-__all__=['parser', 'objects', 'r_wrapper']
+__all__=['objects', 'parser', 'r_wrapper']
