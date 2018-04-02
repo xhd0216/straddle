@@ -1,3 +1,4 @@
+import datetime
 import logging
 import sqlalchemy
 
@@ -6,7 +7,8 @@ from mysql_connect import get_mysql_connect
 def get_engine(cnf):
   return sqlalchemy.create_engine(get_mysql_connect(cnf))
 
-if __name__ == '__main__':
-  eng = get_engine('/home/joe/codes/config-straddle/test-mysql.cnf')
-  res = eng.execute('show tables;').fetchall()
-  print res
+def insert_options():
+  rows = sqlalchemy.Table('options_test')
+  i = rows.insert()
+  i.execute({'underlying':'aapl', 'strike':160, 'expiration':'2018-04-20', 'is_call':True, 'query_time':datetime.datetime.now()})
+

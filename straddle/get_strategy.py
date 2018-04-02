@@ -54,9 +54,9 @@ def data_preprocessing(data_in,
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', required=True)
-  parser.add_argument('--TTE-min', default=1, type=int,
+  parser.add_argument('--TTE-min', default=3, type=int,
                       help='min time to expire')
-  parser.add_argument('--TTE-max', default=90, type=int,
+  parser.add_argument('--TTE-max', default=30, type=int,
                       help='max time to expire')
   parser.add_argument('--strategy', type=str, required=True)
   parser.add_argument('--arg-list', required=True, nargs='*',
@@ -64,7 +64,8 @@ def main():
   parser.add_argument('--log-file', help='log file')
   parser.add_argument('--log-mode', default='a',
                       help='log file mode (a or w)')
-  parser.add_argument('--log-level', default='debug',help='log level')
+  parser.add_argument('--log-level', default='debug', help='log level')
+  parser.add_argument('--db-cnf', default=False, help='if db config file is given, write results to db')
 
   opts = parser.parse_args()
   if opts.log_file:
@@ -84,7 +85,7 @@ def main():
 
   # data preprocessing
   # step 1, filter the time range
-  data = data_preprocessing(res, [10, 30], [160, 170])
+  data = data_preprocessing(res, [opts.TTE_min, opts_TTE_max], [160, 170])
   # print all calls
   for k in sorted(data[1].keys()):
     print "=====", k, "====="
