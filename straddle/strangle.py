@@ -26,12 +26,12 @@ class Strangle(strategies):
     if legs[1].getExpirationDate() != self.getExpirationDate():
       logging.error('all legs should have same expiration date')
       return None
-    
+
     if not legs[0].isCall() or not legs[1].isCall():
       logging.error('Strangle legs must be calls')
       return None
     return Strangle(legs, price)
-  
+
   def getBuyPrice(self):
     """ return the price to BUY this strategy """
     legs = self.getStrikes()

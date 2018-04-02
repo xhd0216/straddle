@@ -103,7 +103,7 @@ def GetOptionChainPage():
   #print options_url
   if earning_url == None:
     print 'failed to get url for earning'
-    return 
+    return
   try:
     g = GetURL(earning_url)
   except:
@@ -120,4 +120,4 @@ def GetOptionChainPage():
     o = optionParser()
     o.feed(k)
   return
-#GetOptionChainPage() 
+#GetOptionChainPage()

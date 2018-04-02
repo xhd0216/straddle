@@ -29,7 +29,7 @@ def par(output):
 
 def greeks(arg_dicts):
 	""" wrapper to call greeks in R
-			input in an array of dicts
+			input is an array of dicts
 	"""
 	new_file, filename = tempfile.mkstemp()
 	print filename

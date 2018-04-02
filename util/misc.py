@@ -1,18 +1,20 @@
 import datetime
 
 def isStrUnicode(a):
+  """ if input is string or unicode """
   return isinstance(a, str) or isinstance(a, unicode)
 
 
 # date formats that are supported
-date_formats = ['%Y-%m-%d',
+DATE_FORMATS = ['%Y-%m-%d',
                 '%b %d, %Y',
                 '%B %d, %Y',
                 '%Y%m%d']
+
 def fix_date(a):
   """ convert a str or int to date """
   if isStrUnicode(a):
-    for df in date_formats:
+    for df in DATE_FORMATS:
       try:
         res = datetime.datetime.strptime(a, df)
       except:
@@ -26,6 +28,7 @@ def fix_date(a):
     # case 2, YYYYMMDD
     elif a > 10000101 and a <= 99991231:
       return datetime.datetime(a / 10000, (a/100)%100, a % 100)
+
   return None
 
 
@@ -38,7 +41,7 @@ def fix_date(a):
 def fix_instance(a, t):
   """ convert input a to type t """
   # if a is not an instance of t, try to fix it
-  # return (ok, a) 
+  # return (ok, a)
   # ok=False means cannot be fixed
   # ok=True means it is fixed, a is return; OR, a is an instance of t, needs not to fix
   assert isinstance(t, type)
@@ -55,7 +58,7 @@ def fix_instance(a, t):
         # cannot fix, but keep it...
         return True, None
       return True, a
-    # otherwise      
+    # otherwise
     try:
       a = str(a)
     except:
@@ -117,5 +120,5 @@ def getDayAfterRange(a, b):
   """ get a range of days in range(a,b) = [a,b), in seconds. """
   if not isinstance(a, int) or not isinstance(b, int):
     return []
-  r = getNowDate()                           
+  r = getNowDate()
   return [r + datetime.timedelta(days=i) for i in range(a,b)]

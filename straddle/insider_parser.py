@@ -14,19 +14,22 @@ class insiderParser(myParser):
     self.has_data = False
     self.last_symbol = ''
     self.aggregated = dict()
+
   def handle_starttag(self, tag, attrs):
     self.tagOn(tag)
     if tag == 'td':
       self.has_data = False
+
   def handle_data(self, data):
     self.has_data = True
     if self.isTagOn('table') and self.isTagOn('tr') and self.isTagOn('td'):
       if len(data) > 0: ## non-empty data
         self.data_row.append(data)
         if len(self.data_row) == 1:
-          self.last_symbol = data 
+          self.last_symbol = data
+
   def handle_endtag(self, tag):
-    if tag == 'td' and self.has_data == False:
+    if tag == 'td' and not self.has_data:
       self.data_row.append(self.last_symbol)
     if tag == 'tr':
       if self.isTagOn('table'):
@@ -34,8 +37,10 @@ class insiderParser(myParser):
           self.table.append(self.data_row)
         self.data_row = []
     self.tagOff(tag)
+
   def getTable(self):
     return self.table
+
   def getAggregatedTable(self):
     #sym = ''
     #total_value = 0

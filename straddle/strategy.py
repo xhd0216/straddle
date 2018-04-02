@@ -13,7 +13,7 @@ default_misc = None
 
 default_date_format = "%b %d, %Y" ## Nov 11, 2017
 
-strike_field = {'underlying':str, 
+strike_field = {'underlying':str,
                 'strike':float,
                 'expiration':datetime.datetime,
                 'price':float,
@@ -74,10 +74,10 @@ class Strike(objects):
         self.data['position'] = 0
       self.data['position'] += pos
     else:
-      self.data['position'] = pos 
+      self.data['position'] = pos
 
   def setAsk(self, m):
-    return self.addKey('ask', m) 
+    return self.addKey('ask', m)
 
   def setBid(self, m):
     return self.addKey('bid', m)
@@ -106,7 +106,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
     if not isinstance(res[k], strike_field[k]):
       b, a = fix_instance(res[k], strike_field[k])
       if not b:
-        logging.error("required field %s error %s", k, res[k]) 
+        logging.error("required field %s error %s", k, res[k])
         return None
       res[k] = a
   # 5, check auxiliary fields
@@ -125,7 +125,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
 def parse_strike(s):
   a = json.loads(s)
   return create_strike(a)
- 
+
 
 def parseStrike(s):
 	try:
