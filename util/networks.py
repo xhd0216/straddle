@@ -8,7 +8,8 @@ def GetURL(url, encode=False):
     f.close()
   except Exception, msg:
     logging.error('failed to open url %s, msg=%s', url, msg)
-    return None
+    raise
+
   c = f.getcode()
   if c != 200:
     logging.error('page %s not downloaded, return code: %s', url, c)
@@ -20,4 +21,3 @@ def GetURL(url, encode=False):
         encoding=ct.split('charset=')[-1]
         g = unicode(g, encoding)
   return g
-  

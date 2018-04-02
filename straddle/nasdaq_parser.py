@@ -65,7 +65,7 @@ class nasdaqParser(HTMLParser):
     js = '{\"data\":['
     for t in range(len(self.data)):
       i = self.data[t]
-      js += '{' 
+      js += '{'
       for j in range(len(i)):
         js += '\"' + headers[j] + '\":' + '\"' + str(i[j]) + '\"'
         if j != len(i) - 1:
@@ -85,7 +85,7 @@ def get_strike_list(symbol):
   f.close()
   r = []
   p = nasdaqParser()
-  p.feed(g)    
+  p.feed(g)
   for i in p.getData():
     miscc = {'underlying':symbol, 'strike':i[8], 'expiration':i[0], 'call':True, 'open_int':i[6]}
     if i[3] != '-':

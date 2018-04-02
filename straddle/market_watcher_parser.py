@@ -97,7 +97,7 @@ def getStrikeInstance(symb, exp, price, call, row):
   if cl != DATA_PLACE_HOLDER and cl != '':
     miscc['last'] = cl
   return create_strike(misc=miscc)
-  
+
 
 class MWFormParser(HTMLParser):
   def __init__(self):
@@ -269,16 +269,16 @@ def main():
   parser.add_argument('--log-mode', default='a',
                       help='log file mode (a or w)')
   parser.add_argument('--log-level', default='debug',help='log level')
-  
+
   opts = parser.parse_args()
   if opts.log_file:
     set_logger(level=opts.log_level, filename=opts.log_file,
                mode=opts.log_mode)
   else:
-    set_logger(level=opts.log_level, out=sys.stdout) 
+    set_logger(level=opts.log_level, out=sys.stdout)
 
   #getOptionMW(opts.symbol)
 
- 
+
 if __name__ == '__main__':
   main()

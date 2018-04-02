@@ -22,7 +22,7 @@ def GetEarningsInRange(a, b):
     url = ZACKS_API_URL % str(getTimeSecond(t))
     g = GetURL(url)
     if g is None:
-      logging.error("failed to date %s, url=%s", datetime.datetime.strftime(t, '%Y-%m-%d'), url) 
+      logging.error("failed to date %s, url=%s", datetime.datetime.strftime(t, '%Y-%m-%d'), url)
       # failed to load page
       continue
     j = json.loads(g)
@@ -45,7 +45,7 @@ def GetEarningsInRange(a, b):
       earn.setDate(str(t))
       res.append(earn)
   return res
-      
+
 
 def main():
   logging.info("in zacks")

@@ -11,7 +11,7 @@ LOG_OPTIONS = {
 
 def set_logger(level='debug', out=None, filename=None, mode='a'):
   assert level in LOG_OPTIONS
- 
+
   logger = logging.getLogger()
   logger.setLevel(LOG_OPTIONS[level])
 
@@ -25,7 +25,7 @@ def set_logger(level='debug', out=None, filename=None, mode='a'):
     ch.setLevel(LOG_OPTIONS[level])
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-  
+
   if filename:
     ## print log to file
     fh = logging.FileHandler(filename=filename, mode=mode)

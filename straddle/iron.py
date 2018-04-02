@@ -29,7 +29,7 @@ class IronCondor(strategies):
       logging.error('leg spread should be equal')
       return None
     return IronCondor(legs)
-  
+
   def getTargetReturn(self):
     """ get the target return at expiration """
     legs = self.getStrikes()
