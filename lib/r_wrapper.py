@@ -1,6 +1,5 @@
 import os
 from subprocess import Popen, PIPE
-import tempfile
 
 
 # the output should look like this:
@@ -27,23 +26,36 @@ def par(output):
 	return res
 
 
-def greeks(arg_dicts):
-	""" wrapper to call greeks in R
-			input is an array of dicts
-	"""
-	new_file, filename = tempfile.mkstemp()
-	print filename
-	os.write(new_file, "this is some content")
-	os.close(new_file)
-	p = Popen(["Rscript", "greeks.R"], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+def greeks(arg_dicts, vol=None, rate=None):
+  """ wrapper to call greeks in R
+      input is an array of dicts
+  """
+  if vol is None:
+    assert 'vol' in arg_dicts[0]
+  if rate is None:
+    assert 'rate' in arg_dicts[0]
 
-	output = p.communicate(input=filename + '\n' + 'abc' + '\n')
-	# output[0] = stdout, output[1] = stderr
-	rc = p.returncode
-	if rc != 0:
-	  exit(2)
-	print par(output[0])
-	print output[1]
+  p = Popen(["Rscript", "greeks.R"], stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
+  for adi in arg_dicts:
+    if vol is not None:
+      adi.update({'vol':vol})
+    if rate is not None:
+      adi.update({'rate':rate})
+    p.stdin.write('%(underlying)s %(strike)s %(vol)s %(rate)s %(tte)s\n' % adi)
+    output = ''
+    while True:
+      line = p.stdout.readline()
+      if line.strip() != '':
+        output += line
+      else:
+        break
+    print output
+    print "========="
+  output = p.communicate(input='\n')
+  # output[0] = stdout, output[1] = stderr
+  rc = p.returncode
+  if rc != 0:
+    exit(2)
 
 greeks(None)
