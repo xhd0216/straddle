@@ -33,6 +33,8 @@ class objects():
 
   def __json__(self, indent=4, sort_keys=True):
     """ dump data to json file """
+    if not self.isValid():
+      return json.dumps({})
     return json.dumps(self.data,
                       sort_keys=sort_keys,
                       indent=indent,

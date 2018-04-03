@@ -7,7 +7,7 @@ url_json_file = os.path.join(os.path.dirname(__file__), 'url.json')
 class url_struct(objects):
   def __init__(self, d, name=None):
     objects.__init__(self)
-    self.addRequiredField('url', str)
+    self.addField('url', str, True)
     if not isinstance(d, dict):
       print "invalid input: needs a dictionary"
       return

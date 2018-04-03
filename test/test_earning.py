@@ -1,3 +1,4 @@
+"""
 import os
 from straddle.earnings import *
 
@@ -20,3 +21,4 @@ def test_yahoo_page_empty():
   p = earningParser()
   p.feed(g)
   assert p.__json__() == json_empty
+"""

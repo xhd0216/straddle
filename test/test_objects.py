@@ -4,9 +4,9 @@ import json
 class testObjects(objects):
   def __init__(self):
     objects.__init__(self)
-    self.addRequiredField('str_field', str)
-    self.addRequiredField('int_field', int)
-    self.addRequiredField('float_field', float)
+    self.addField('str_field', str, True)
+    self.addField('int_field', int, True)
+    self.addField('float_field', float, True)
 
 def test_objects_to_json():
   t = testObjects()
@@ -46,10 +46,11 @@ def test_wrong_key_types():
 
 def test_add_required_field():
   t = testObjects()
-  assert not t.addRequiredField('str_field', str)
-  assert t.addKey('str_field', 'correct key')
-  assert not t.addRequiredField('str_field', int)
-  assert t.getKey('str_field')
-  assert t.addRequiredField('str_field', int, True)
+  t.addField('str_field2', str, True)
+  t.addField('str_field3', str, False)
+  assert t.addKey('str_field2', 'correct key')
+  assert t.getKey('str_field2')
+  assert t.addKey('str_field3', 'correct key')
+  assert t.getKey('str_field3')
   assert not t.getKey('str_field')
   

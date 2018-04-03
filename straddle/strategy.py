@@ -11,7 +11,7 @@ default_expiration = "Dec 31, 2099"
 default_call = True
 default_misc = None
 
-default_date_format = "%b %d, %Y" ## Nov 11, 2017
+default_date_format = "%Y-%m-%d"
 
 strike_field = {'underlying':str,
                 'strike':float,
@@ -87,7 +87,7 @@ class Strike(objects):
 
 
 def create_strike(misc, underlying=None, strike=None, expiration=None,
-                  call=None, query_time=None):
+                  call=None, price=None, query_time=None):
   """ create a strike """
   # create dictionary
   # 1, get all inputs (underlying, ...)
@@ -102,6 +102,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
   # 4, check required fields
   for k in strike_field:
     if k not in res:
+      logging.error('missing required field %s', k)
       return None
     if not isinstance(res[k], strike_field[k]):
       b, a = fix_instance(res[k], strike_field[k])
@@ -115,7 +116,6 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
       b, a = fix_instance(res[k], strike_auxiliary[k])
       if not b:
         logging.error("auxiliary field %s error %s", k, res)
-        assert 0
         return None
       res[k] = a
   # 6, return
@@ -124,16 +124,9 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
 
 def parse_strike(s):
   a = json.loads(s)
+  assert a
   return create_strike(a)
 
-
-def parseStrike(s):
-	try:
-		a = json.loads(s)
-		r = Strike(misc=a)
-	except:
-		return None
-	return r
 
 strategy_must = {
   "name":str,
