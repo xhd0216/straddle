@@ -12,7 +12,9 @@ DEFAULT_TIME_FORMAT_STR = '%Y-%m-%d %H:%M'
 
 def obj_convert(o):
   """ convert objects to json serializables """
-  if isinstance(o, datetime.datetime):
+  if isinstance(o, datetime.date):
+    return datetime.date.strftime(o, DEFAULT_DATE_FORMAT_STR)
+  elif isinstance(o, datetime.datetime):
     if o.hour == 0 and o.minute == 0:
       # only print date
       return datetime.datetime.strftime(o, DEFAULT_DATE_FORMAT_STR)
