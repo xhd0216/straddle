@@ -61,7 +61,7 @@ class objects():
 
   def isValid(self):
     """ validate all keys in data """
-    if self.data == None:
+    if self.data is None:
       logging.error("no data")
       return False
 

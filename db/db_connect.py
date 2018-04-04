@@ -1,3 +1,7 @@
+"""
+  connection to database
+"""
+
 import datetime
 import logging
 import sqlalchemy
@@ -25,7 +29,7 @@ def obj_convert(o):
     return '"%s"' % datetime.date.strftime(o, '%Y-%m-%d')
   elif isinstance(o, datetime.datetime):
     if o.hour == 0 and o.minute == 0:
-      # only print date
+      # this is also a date, only print date
       return '"%s"' % datetime.datetime.strftime(o, '%Y-%m-%d')
     else:
       return '"%s"' % datetime.datetime.strftime(o, '%Y-%m-%d %H:%M:%S')
@@ -40,10 +44,11 @@ def get_engine(cnf):
 
 
 INSERT_SQL = """
-  insert into %s (%s) values (%s);
+  INSERT IGNORE INTO %s (%s) VALUES (%s);
 """
 
 def create_values_str(strike):
+  """ create values str used in sql """
   data = strike.data
   res = []
   for cv in COLUMN_TYPES:
@@ -51,10 +56,16 @@ def create_values_str(strike):
       res.append(cv)
   cols = ','.join(res)
   vals = ','.join([obj_convert(data[x]) for x in res])
+  if 'query_time' not in data:
+    # query time is not a required field in strike,
+    # but it is a primary key in db
+    cols += ',query_time'
+    vals += ',' + obj_convert(datetime.datetime.now())
   return cols, vals
 
 
 def create_insert_sql(strike, table_name=TABLE_NAME):
+  """ create sql insert statement for a strike """
   cols, vals = create_values_str(strike)
   return INSERT_SQL % (table_name, cols, vals)
 
@@ -67,6 +78,9 @@ def insert_multiple(eng, arr):
   session = Session()
   try:
     for s in arr:
+      if not Strike.isValid():
+        logging.error('strike is not valid')
+        continue
       cmd = sqlalchemy.text(create_insert_sql(s))
       session.execute(cmd)
     session.commit()
