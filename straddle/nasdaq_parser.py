@@ -87,14 +87,14 @@ def get_strike_list(symbol):
   p = nasdaqParser()
   p.feed(g)
   for i in p.getData():
-    miscc = {'underlying':symbol, 'strike':i[8], 'expiration':i[0], 'call':True, 'open_int':i[6]}
+    miscc = {'underlying':symbol, 'strike':i[8], 'expiration':i[0], 'is_call':True, 'open_int':i[6]}
     if i[3] != '-':
       miscc['bid'] = i[3]
     if i[4] != '-':
       miscc['ask'] = i[4]
     call = create_strike(misc=miscc)
     r.append(call)
-    miscp = {'underlying':symbol, 'strike':i[8], 'expiration':i[9], 'call':False, 'open_int':i[15]}
+    miscp = {'underlying':symbol, 'strike':i[8], 'expiration':i[9], 'is_call':False, 'open_int':i[15]}
     if i[12] != '-':
       miscp['bid'] = i[12]
     if i[13] != '-':

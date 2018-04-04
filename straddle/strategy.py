@@ -17,7 +17,7 @@ strike_field = {'underlying':str,
                 'strike':float,
                 'expiration':datetime.datetime,
                 'price':float,
-                'call':bool}
+                'is_call':bool}
 
 strike_auxiliary = {'bid':float,
                     'ask':float,
@@ -46,7 +46,7 @@ class Strike(objects):
     return self.getKey('strike')
 
   def isCall(self):
-    return self.getKey('call')
+    return self.getKey('is_call')
 
   def getUnderlying(self):
     return self.getKey('underlying')
@@ -87,7 +87,7 @@ class Strike(objects):
 
 
 def create_strike(misc, underlying=None, strike=None, expiration=None,
-                  call=None, price=None, query_time=None):
+                  is_call=None, price=None, query_time=None):
   """ create a strike """
   # create dictionary
   # 1, get all inputs (underlying, ...)

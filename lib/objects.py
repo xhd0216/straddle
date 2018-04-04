@@ -48,12 +48,13 @@ class objects():
     assert isinstance(t, type)
 
     if k not in self.data:
-      logging.warning("key %s is not in data", k)
+      if required:
+        logging.error('missing required key %s', k)
       return not required
 
     b, a = fix_instance(self.data[k], t)
     if b == False:
-      lowarning.error("type error")
+      logging.error("type error")
     elif a != None:
       # fix it.
       self.data[k] = a

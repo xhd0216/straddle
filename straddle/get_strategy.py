@@ -54,9 +54,9 @@ def data_preprocessing(data_in,
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', required=True)
-  parser.add_argument('--TTE-min', default=3, type=int,
+  parser.add_argument('--TTE-min', default=3, type=int, required=True,
                       help='min time to expire')
-  parser.add_argument('--TTE-max', default=30, type=int,
+  parser.add_argument('--TTE-max', default=30, type=int, required=True,
                       help='max time to expire')
   parser.add_argument('--strategy', type=str, required=True)
   parser.add_argument('--arg-list', required=True, nargs='*',
@@ -85,12 +85,12 @@ def main():
 
   # data preprocessing
   # step 1, filter the time range
-  data = data_preprocessing(res, [opts.TTE_min, opts_TTE_max], [160, 170])
-  # print all calls
-  for k in sorted(data[1].keys()):
-    print "=====", k, "====="
-    for s in data[1][k]:
-      print s.__json__()
+  data = data_preprocessing(res, [opts.TTE_min, opts.TTE_max], [160, 170])
+  for i in range(2):
+    for k in sorted(data[1].keys()):
+      print "=====", k, "====="
+      for s in data[i][k]:
+        print s.__json__()
 
 
 if __name__ == '__main__':

@@ -77,7 +77,7 @@ def getStrikeInstance(symb, exp, price, call, row):
            'strike':getStrike(row),
            'expiration':exp,
            'price':price,
-           'call':call}
+           'is_call':call}
   if call:
     oi = getCallOpenInt(row)
     ca = getCallAsk(row)
@@ -239,6 +239,8 @@ class MarketWatcherParser(HTMLParser):
 
 
   def getData(self):
+    for r in self.data:
+      r.data['price'] = self.getLastUnderlyingPrice()
     return self.data
 
 

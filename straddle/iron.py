@@ -56,7 +56,7 @@ def create_iron_condor(strikes, underlying, expiration):
   misc = dict()
   misc['underlying'] = underlying
   misc['expiration'] = expiration
-  legs = [create_strike(misc = misc, call=True, strike=strikes[i]) for i in range(4)]
+  legs = [create_strike(misc = misc, is_call=True, strike=strikes[i]) for i in range(4)]
   return IronCondor.create(legs)
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@
 import datetime
 import logging
 import sqlalchemy
+from sqlalchemy import orm
 
 from mysql_connect import get_mysql_connect
 from straddle.market_watcher_parser import getOptionMW
@@ -16,7 +17,7 @@ COLUMN_TYPES = ['underlying',
                 'price',
                 'strike',
                 'expiration',
-                'call',
+                'is_call',
                 'query_time',
                 'ask',
                 'bid',
@@ -25,14 +26,16 @@ COLUMN_TYPES = ['underlying',
 
 def obj_convert(o):
   """ convert objects to sql str """
-  if isinstance(o, datetime.date):
-    return '"%s"' % datetime.date.strftime(o, '%Y-%m-%d')
-  elif isinstance(o, datetime.datetime):
+  # note: isinstance(datetime.datetime, datetime.date) = True
+  # note: isinstance(datetime.date, datetime.datetime) = False
+  if isinstance(o, datetime.datetime):
     if o.hour == 0 and o.minute == 0:
       # this is also a date, only print date
       return '"%s"' % datetime.datetime.strftime(o, '%Y-%m-%d')
     else:
       return '"%s"' % datetime.datetime.strftime(o, '%Y-%m-%d %H:%M:%S')
+  elif isinstance(o, datetime.date):
+    return '"%s"' % datetime.date.strftime(o, '%Y-%m-%d')
   elif isinstance(o, str) or isinstance(o, unicode):
     return '"%s"' % o
   else:
@@ -74,18 +77,18 @@ def insert_multiple(eng, arr):
   if not arr:
     return
   assert isinstance(arr[0], Strike)
-  Session = sqlalchemy.orm.sessionmaker(bind=engine.engine)
+  Session = orm.session.sessionmaker(bind=eng.engine)
   session = Session()
   try:
     for s in arr:
-      if not Strike.isValid():
+      if not s.isValid():
         logging.error('strike is not valid')
         continue
       cmd = sqlalchemy.text(create_insert_sql(s))
       session.execute(cmd)
     session.commit()
-  except:
-    logging.error('failed to insert strike to database')
+  except Exception as msg:
+    logging.error('failed to insert strike to database %s', str(msg))
     session.rollback()
   finally:
     session.close()
@@ -93,8 +96,6 @@ def insert_multiple(eng, arr):
 
 if __name__ == '__main__':
   row = getOptionMW()
-  #eng = sqlalchemy.create_engine('mysql://localhost/test_vdb')
-  #insert_multiple(eng, row[:10])
-  for i in range(10):
-    print create_insert_sql(row[i])
-
+  eng = sqlalchemy.create_engine(get_mysql_connect('/home/joe/codes/config-straddle/test-options.cnf'))
+  insert_multiple(eng, row)
+  
