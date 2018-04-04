@@ -4,11 +4,8 @@
 
 import datetime
 import logging
-import os
-import sqlalchemy
-from sqlalchemy import orm
 
-from mysql_connect import get_mysql_connect
+from mysql_connect import create_mysql_session
 from straddle.market_watcher_parser import getOptionMW
 from straddle.strategy import Strike
 
@@ -74,29 +71,41 @@ def create_insert_sql(strike, table_name=TABLE_NAME):
   return INSERT_SQL % (table_name, cols, vals)
 
 
-def insert_multiple(eng, arr):
+def insert_multiple(session, arr):
+  """ insert an array of strikes to database """
   if not arr:
     return
   assert isinstance(arr[0], Strike)
-  Session = orm.session.sessionmaker(bind=eng.engine)
-  session = Session()
-  try:
-    for s in arr:
-      if not s.isValid():
-        logging.error('strike is not valid')
-        continue
-      cmd = sqlalchemy.text(create_insert_sql(s))
-      session.execute(cmd)
-    session.commit()
-  except Exception as msg:
-    logging.error('failed to insert strike to database %s', str(msg))
-    session.rollback()
-  finally:
-    session.close()
+  for s in arr:
+    if not s.isValid():
+      logging.error('strike is not valid')
+      continue
+    cmd = sqlalchemy.text(create_insert_sql(s))
+    cmds.append(cmd)
+  session.execute_mulitple(cmds)
+
+
+def main():
+  """ main function to insert options to db """
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--symbol', default='spy')
+  parser.add_argument('--cnf', help='config file for db')
+  parser.add_argument('--log-file', help='log file')
+  parser.add_argument('--log-mode', default='a',
+                      help='log file mode (a or w)')
+  parser.add_argument('--log-level', default='debug',help='log level')
+
+  opts = parser.parse_args()
+  if opts.log_file:
+    set_logger(level=opts.log_level, filename=opts.log_file,
+               mode=opts.log_mode)
+  else:
+    set_logger(level=opts.log_level, out=sys.stdout)
+
+  session = create_mysql_session(opts.cnf)
+  rows = getOptionMW(opts.symbol)
+  insert_multiple(session, rows)
 
 
 if __name__ == '__main__':
-  eng = sqlalchemy.create_engine(get_mysql_connect(os.path.join(os.path.dirname(__file__), 'test-options.cnf')))
-  row = getOptionMW()
-  insert_multiple(eng, row)
-  
+  main()
