@@ -4,6 +4,7 @@
 
 import datetime
 import logging
+import os
 import sqlalchemy
 from sqlalchemy import orm
 
@@ -95,7 +96,7 @@ def insert_multiple(eng, arr):
 
 
 if __name__ == '__main__':
+  eng = sqlalchemy.create_engine(get_mysql_connect(os.path.join(os.path.dirname(__file__), 'test-options.cnf')))
   row = getOptionMW()
-  eng = sqlalchemy.create_engine(get_mysql_connect('/home/joe/codes/config-straddle/test-options.cnf'))
   insert_multiple(eng, row)
   
