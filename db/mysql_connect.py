@@ -5,10 +5,10 @@ from sqlalchemy import orm
 
 def get_mysql_connect(cnf):
   with open(cnf, 'r') as cobj:
-    r = cobj.read()
+    r = cobj.readlines()
   client_flag = False
   res = {}
-  for line in r.split():
+  for line in r:
     line = line.strip()
     if line == '':
       continue
@@ -23,21 +23,21 @@ def get_mysql_connect(cnf):
     else:
       a = line.split('=')
       res[a[0].strip()] = a[1].strip()
-  if 'user' not in res:
-    logging.error('missing user in cnf file')
-    return None
-  if 'password' not in res:
-    logging.error('missing password in cnf file')
-    return None
   if 'host' not in res:
     logging.warning('missing host in cnf file, use localhost')
     res['host'] = 'localhost'
   if 'port' not in res:
-    logging.warning('missing port in cnf file, use 3306')
+    logging.info('missing port in cnf file, use 3306')
     res['port'] = 3306
   if 'database' not in res:
-    logging.warnign('missing database in cnf file')
+    logging.warning('missing database in cnf file')
     res['database'] = ''
+  if 'user' not in res:
+    logging.warning('missing user in cnf file')
+    return 'mysql://%(host)s:%(port)s/%(database)s' % res
+  if 'password' not in res:
+    logging.warning('missing password in cnf file')
+    return None
   return 'mysql://%(user)s:%(password)s@%(host)s:%(port)s/%(database)s' % res
 
 
@@ -45,13 +45,13 @@ class mysqlSession():
   def __init__(self, url):
     self.engine = sqlalchemy.create_engine(url)
   def execute_multiple(self, cmds):
-    """ execute multiple commands in one session """
-    if not arr:
+    """ execute multiple commands (insert update delete) in one session """
+    if not cmds:
       return
-    Session = orm.session.sessionmaker(bind=eng.engine)
+    Session = orm.session.sessionmaker(bind=self.engine.engine)
     session = Session()
     try:
-      for cmd in arr:
+      for cmd in cmds:
         session.execute(sqlalchemy.text(cmd))
       session.commit()
     except Exception as msg:
@@ -61,12 +61,9 @@ class mysqlSession():
       session.close()
 
   def execute(self, cmd):
-    """ select or insert """
-    pass
-  def fetchall(self):
-    pass
-  def fetchone(self):
-    pass
+    """ select """
+    conn = self.engine.connect()
+    return conn.execute(cmd).fetchall()
 
 
 def create_mysql_session(cnf=None):
