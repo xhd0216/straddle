@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Straddle',
-    version='0.3.0',
+    version='0.3.1',
     author_email='xhd0216@gmail.com',
     url='https://github.com/xhd0216/straddle',
     packages=find_packages(),
@@ -13,7 +13,8 @@ setup(
       'console_scripts': [
         'getOptionsPrices = straddle.market_watcher_parser:main',
         'getEarningCalendar = straddle.zacks_parser:main',
-        'getStrategy = straddle.get_strategy:main'
+        'getStrategy = straddle.get_strategy:main',
+        'uploadOptionsPrices = db.db_connect:main',
       ]
     },
     install_requires=[
