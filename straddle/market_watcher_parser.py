@@ -29,41 +29,24 @@ TABLE_HEADERS=["Symbol",
                "Ask",
                "OpenInt"]
 
-
-def getCallLast(row):
-  return row[1]
-
-
-def getPutLast(row):
-  return row[9]
+def getRowLast(row, call):
+  return row[1] if call else row[9]
 
 
-def getCallAsk(row):
-  return row[5]
+def getRowAsk(row, call):
+  return row[5] if call else row[13]
 
 
-def getPutAsk(row):
-  return row[13]
-
-
-def getCallBid(row):
-  return row[4]
-
-
-def getPutBid(row):
-  return row[12]
+def getRowBid(row, call):
+  return row[4] if call else row[12]
 
 
 def getStrike(row):
   return row[7]
 
 
-def getCallOpenInt(row):
-  return row[6]
-
-
-def getPutOpenInt(row):
-  return row[14]
+def getRowOpenInt(row, call):
+  return row[6] if call else row[14]
 
 
 def getAttr(attrs, key):
@@ -78,16 +61,11 @@ def getStrikeInstance(symb, exp, price, call, row):
            'expiration':exp,
            'price':price,
            'is_call':call}
-  if call:
-    oi = getCallOpenInt(row)
-    ca = getCallAsk(row)
-    cb = getCallBid(row)
-    cl = getCallLast(row)
-  else:
-    oi = getCallOpenInt(row)
-    ca = getCallAsk(row)
-    cb = getCallBid(row)
-    cl = getCallLast(row)
+  oi = getRowOpenInt(row ,call)
+  ca = getRowAsk(row ,call)
+  cb = getRowBid(row ,call)
+  cl = getRowLast(row ,call)
+
   if oi != DATA_PLACE_HOLDER and oi != '':
     miscc['open_int'] = oi
   if ca != DATA_PLACE_HOLDER and ca != '':

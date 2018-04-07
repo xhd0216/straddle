@@ -1,11 +1,13 @@
 """
   connection to database
 """
-
+import argparse
 import datetime
 import logging
+import sys
 
 from mysql_connect import create_mysql_session
+from util.logger import set_logger
 from straddle.market_watcher_parser import getOptionMW
 from straddle.strategy import Strike
 
@@ -40,9 +42,6 @@ def obj_convert(o):
     # int, bool, float, etc
     return str(o)
 
-def get_engine(cnf):
-  return sqlalchemy.create_engine(get_mysql_connect(cnf))
-
 
 INSERT_SQL = """
   INSERT IGNORE INTO %s (%s) VALUES (%s);
@@ -76,13 +75,14 @@ def insert_multiple(session, arr):
   if not arr:
     return
   assert isinstance(arr[0], Strike)
+  cmds = []
   for s in arr:
     if not s.isValid():
       logging.error('strike is not valid')
       continue
-    cmd = sqlalchemy.text(create_insert_sql(s))
+    cmd = create_insert_sql(s)
     cmds.append(cmd)
-  session.execute_mulitple(cmds)
+  session.execute_multiple(cmds)
 
 
 def main():
@@ -101,7 +101,8 @@ def main():
                mode=opts.log_mode)
   else:
     set_logger(level=opts.log_level, out=sys.stdout)
-
+  
+  logging.info("========== %s ==========", str(datetime.datetime.now()))
   session = create_mysql_session(opts.cnf)
   rows = getOptionMW(opts.symbol)
   insert_multiple(session, rows)
