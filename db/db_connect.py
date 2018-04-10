@@ -7,9 +7,10 @@ import logging
 import sys
 
 from mysql_connect import create_mysql_session
-from util.logger import set_logger
+from straddle.get_strategy import filter_date_range, filter_price_range
 from straddle.market_watcher_parser import getOptionMW
 from straddle.strategy import Strike
+from util.logger import set_logger
 
 
 TABLE_NAME = 'test_options'
@@ -105,6 +106,9 @@ def main():
   logging.info("========== %s ==========", str(datetime.datetime.now()))
   session = create_mysql_session(opts.cnf)
   rows = getOptionMW(opts.symbol)
+  price = rows[0].getKey('price')
+  rows = filter_price_range(rows, int(price*0.85), int(price*1.15))
+  rows = filter_date_range(rows, 0, 60)
   insert_multiple(session, rows)
 
 
