@@ -8,18 +8,19 @@ from util.misc import *
 
 
 DEFAULT_DATE_FORMAT_STR = '%Y-%m-%d'
-DEFAULT_TIME_FORMAT_STR = '%Y-%m-%d %H:%M'
+DEFAULT_TIME_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
 
 def obj_convert(o):
   """ convert objects to json serializables """
-  if isinstance(o, datetime.date):
-    return datetime.date.strftime(o, DEFAULT_DATE_FORMAT_STR)
-  elif isinstance(o, datetime.datetime):
+  if isinstance(o, datetime.datetime):
     if o.hour == 0 and o.minute == 0:
       # only print date
       return datetime.datetime.strftime(o, DEFAULT_DATE_FORMAT_STR)
     else:
       return datetime.datetime.strftime(o, DEFAULT_TIME_FORMAT_STR)
+  # note: date is not datetime, datetime is date.
+  elif isinstance(o, datetime.date):
+    return datetime.date.strftime(o, DEFAULT_DATE_FORMAT_STR)
   elif hasattr(o, 'data'):
     return o.data
   else:
@@ -72,7 +73,7 @@ class objects():
         return False
       b = self.__validate__(k, self.fields[k])
       if not b:
-        logging.error("wrong type for key %s", k)
+        logging.error("wrong type: key %s, value %s, type %s", k, str(self.data[k]), str(self.fields[k]))
         return False
 
     for k in self.auxiliary.keys():

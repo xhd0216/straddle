@@ -9,9 +9,10 @@ def isStrUnicode(a):
 DATE_FORMATS = ['%Y-%m-%d',
                 '%b %d, %Y',
                 '%B %d, %Y',
-                '%Y%m%d']
+                '%Y%m%d',
+                '%Y-%m-%d, %H:%M:%S',]
 
-def fix_date(a):
+def fix_datetime(a):
   """ convert a str or int to date """
   if isStrUnicode(a):
     for df in DATE_FORMATS:
@@ -28,7 +29,9 @@ def fix_date(a):
     # case 2, YYYYMMDD
     elif a > 10000101 and a <= 99991231:
       return datetime.datetime(a / 10000, (a/100)%100, a % 100)
-
+  elif isinstance(a, datetime.date):
+    # date is not datetime, datetime is date (weird)
+    return datetime.datetime(a.year, a.month, a.day)
   return None
 
 
@@ -84,10 +87,19 @@ def fix_instance(a, t):
       a = float(a)
     except:
       return False, None
-  elif t == datetime.datetime:
-    res = fix_date(a)
+  elif t == datetime.datetime or t == datetime.date:
+    res = fix_datetime(a)
     if res:
-      a = res
+      if t == datetime.date:
+        return True, a.date()
+      return True, res
+    else:
+      return False, None
+  elif t == bool:
+    if isinstance(a, int):
+      return True, a > 0
+    if isinstance(a, str):
+      return True, a.lower() == 'true'
     else:
       return False, None
   else:
