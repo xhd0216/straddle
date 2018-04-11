@@ -18,7 +18,7 @@ fi
 password=$(pwgen 15 1)
 
 # bring up container
-container=$(sudo docker run --name=test-mysql -d --env="MYSQL_ROOT_PASSWORD=$password" mysql)
+container=$(sudo docker run --restart unless-stopped --name=test-mysql -dit --env="MYSQL_ROOT_PASSWORD=$password" mysql)
 echo "container is up $container"
 
 # get IP
