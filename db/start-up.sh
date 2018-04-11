@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # if container already exists
 running=$(sudo docker ps -f "name=test-mysql" -q)
 if [[ $running ]]; then 
@@ -14,6 +15,12 @@ else
   fi
 fi
 
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+if [ ! -f $SCRIPTPATH/cnf-template.cnf ]; then
+  echo "$SCRIPTPATH/cnf-template.cnf template file not found"
+  exit 2
+fi
+
 # create password
 password=$(pwgen 15 1)
 
@@ -26,7 +33,7 @@ ipaddress=$(sudo docker inspect $container | grep \"IPAddress\" | awk -F\" '{pri
 echo "get IP $ipaddress"
 
 # create database
-sed "s/IPADDR/$ipaddress/g;s/PASSWORD/$password/g" ./cnf-template.cnf > ./test-options.cnf
+sed "s/IPADDR/$ipaddress/g;s/PASSWORD/$password/g" $SCRIPTPATH/cnf-template.cnf > $SCRIPTPATH/test-options.cnf
 echo "created cnf file"
 
 echo "sleeping for 60 seconds, wait for mysql to start"
@@ -35,6 +42,6 @@ sleep 60
 mysql --defaults-extra-file=./test-options.cnf -e "create database options;"
 echo "create database"
 
-echo "database=options" >> ./test-options.cnf
+echo "database=options" >> $SCRIPTPATH/test-options.cnf
 
 mysql --defaults-extra-file=./test-options.cnf -e "source ./create_option_table.sql"
