@@ -66,13 +66,16 @@ def call_vols(strike_list, rate):
   """ given list of strikes, calculate the implied vols """
   dir_path = os.path.dirname(os.path.realpath(__file__))
   p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  para_str = ''
   for sl in strike_list:
-    p.stdin.write('%s %s %s %s %s\n' % (
-                  sl.getKey('price'),
-                  sl.getKey('strike'),
-                  rate, # interest rate
-                  sl.getTimeToExp() / 365.0,
-                  sl.getKey('last')))
+    para_str += '%s %s %s %s %s\n' % (
+               sl.getKey('price'),
+               sl.getKey('strike'),
+               rate, # interest rate
+               sl.getTimeToExp() / 365.0,
+               ## don't use 'last', it maybe out of date.
+               sl.getKey('ask'))
+    """
     output = ''
     while True:
       line = p.stdout.readline()
@@ -81,7 +84,14 @@ def call_vols(strike_list, rate):
       else:
         break
     print output
-  output = p.communicate(input='\n')
+    """
+  print para_str
+  output = p.communicate(input=para_str)
+  print "stdout =="
+  print output[0]
+  print "stderr =="
+  print output[1]
+  #output = p.communicate(input='\n')
   rc = p.returncode
   if rc != 0:
     exit(2)
@@ -89,5 +99,6 @@ def call_vols(strike_list, rate):
 if __name__=='__main__':
   import datetime
   strike_list = []
-  strike_list.append(create_strike({'last':1.50}, 'spy', 267, datetime.datetime(2018, 4, 20), True, 266.23))
+  strike_list.append(create_strike({'ask':1.50}, 'spy', 267, datetime.datetime(2018, 4, 20), True, 266.23))
+  strike_list.append(create_strike({'ask':2.50}, 'spy', 268, datetime.datetime(2018, 4, 20), True, 266.23))
   call_vols(strike_list, 0.035)
