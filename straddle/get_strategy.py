@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 
+from lib.r_wrapper import call_vols
 from market_watcher_parser import getOptionMW
 from util.logger import set_logger
 
@@ -54,18 +55,21 @@ def data_preprocessing(data_in,
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', required=True)
-  parser.add_argument('--TTE-min', default=3, type=int, required=True,
+  parser.add_argument('--TTE-min', default=1, type=int,
                       help='min time to expire')
-  parser.add_argument('--TTE-max', default=30, type=int, required=True,
+  parser.add_argument('--TTE-max', default=10, type=int,
                       help='max time to expire')
-  parser.add_argument('--strategy', type=str, required=True)
-  parser.add_argument('--arg-list', required=True, nargs='*',
+  parser.add_argument('--price-range', default=0.1, type=float,
+                      help='strike range, (1 +/- range) * current price')
+  parser.add_argument('--strategy', type=str)
+  parser.add_argument('--arg-list', nargs='*',
                       help='arg list for strategy')
   parser.add_argument('--log-file', help='log file')
   parser.add_argument('--log-mode', default='a',
                       help='log file mode (a or w)')
   parser.add_argument('--log-level', default='debug', help='log level')
-  parser.add_argument('--db-cnf', default=False, help='if db config file is given, write results to db')
+  parser.add_argument('--db-cnf', default=False,
+                      help='if db config file is given, write results to db')
 
   opts = parser.parse_args()
   if opts.log_file:
@@ -85,12 +89,20 @@ def main():
 
   # data preprocessing
   # step 1, filter the time range
-  data = data_preprocessing(res, [opts.TTE_min, opts.TTE_max], [160, 170])
+  price = res[0].getKey('price')
+  data = data_preprocessing(res,
+                            [opts.TTE_min, opts.TTE_max],
+                            [(1 - opts.price_range)*price,
+                             (1 + opts.price_range)*price])
+  call_strikes = []
   for i in range(2):
     for k in sorted(data[1].keys()):
       print "=====", k, "====="
       for s in data[i][k]:
         print s.__json__()
+        if s.isCall():
+          call_strikes.append(s)
+  call_vols(call_strikes, 0.035)
 
 
 if __name__ == '__main__':

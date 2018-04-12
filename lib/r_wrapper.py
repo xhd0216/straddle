@@ -1,6 +1,8 @@
 import os
 from subprocess import Popen, PIPE
 
+from straddle.strategy import create_strike
+
 
 # the output should look like this:
 """
@@ -35,7 +37,8 @@ def greeks(arg_dicts, vol=None, rate=None):
   if rate is None:
     assert 'rate' in arg_dicts[0]
 
-  p = Popen(["Rscript", "greeks.R"], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  dir_path = os.path.dirname(os.path.realpath(__file__))  
+  p = Popen(["Rscript", os.path.join(dir_path, "greeks.R")], stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
   for adi in arg_dicts:
     if vol is not None:
@@ -58,4 +61,33 @@ def greeks(arg_dicts, vol=None, rate=None):
   if rc != 0:
     exit(2)
 
-greeks(None)
+
+def call_vols(strike_list, rate):
+  """ given list of strikes, calculate the implied vols """
+  dir_path = os.path.dirname(os.path.realpath(__file__))
+  p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  for sl in strike_list:
+    p.stdin.write('%s %s %s %s %s\n' % (
+                  sl.getKey('price'),
+                  sl.getKey('strike'),
+                  rate, # interest rate
+                  sl.getTimeToExp() / 365.0,
+                  sl.getKey('last')))
+    output = ''
+    while True:
+      line = p.stdout.readline()
+      if line.strip() != '':
+        output += line
+      else:
+        break
+    print output
+  output = p.communicate(input='\n')
+  rc = p.returncode
+  if rc != 0:
+    exit(2)
+
+if __name__=='__main__':
+  import datetime
+  strike_list = []
+  strike_list.append(create_strike({'last':1.50}, 'spy', 267, datetime.datetime(2018, 4, 20), True, 266.23))
+  call_vols(strike_list, 0.035)
