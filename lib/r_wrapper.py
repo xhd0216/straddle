@@ -1,3 +1,5 @@
+import datetime
+import logging
 import os
 from subprocess import Popen, PIPE
 
@@ -75,30 +77,29 @@ def call_vols(strike_list, rate):
                sl.getTimeToExp() / 365.0,
                ## don't use 'last', it maybe out of date.
                sl.getKey('ask'))
-    """
-    output = ''
-    while True:
-      line = p.stdout.readline()
-      if line.strip() != '':
-        output += line
-      else:
-        break
-    print output
-    """
-  print para_str
   output = p.communicate(input=para_str)
-  print "stdout =="
-  print output[0]
-  print "stderr =="
-  print output[1]
-  #output = p.communicate(input='\n')
   rc = p.returncode
-  if rc != 0:
-    exit(2)
+  if output[1] != '':
+    logging.error('error in R, return code: %s, msg: %s', rc, output[1])
+    return rc
+  lines = output[0].splitlines()
+  assert len(lines) == len(strike_list)
+  for i in range(len(lines)):
+    vol = lines[i].split()[1]
+    strike_list[i].addKey('impvol', float(vol))
+  return 0
 
-if __name__=='__main__':
-  import datetime
+
+def test_implied_vol():
   strike_list = []
   strike_list.append(create_strike({'ask':1.50}, 'spy', 267, datetime.datetime(2018, 4, 20), True, 266.23))
   strike_list.append(create_strike({'ask':2.50}, 'spy', 268, datetime.datetime(2018, 4, 20), True, 266.23))
   call_vols(strike_list, 0.035)
+  for s in strike_list:
+    print s.__json__()
+  strike_list[0].getKey('impvol') == 0.1208742
+  strike_list[1].getKey('impvol') == 0.2191618
+
+
+if __name__ == '__main__':
+  test_implied_vol()

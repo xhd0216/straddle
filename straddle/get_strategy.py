@@ -96,13 +96,15 @@ def main():
                              (1 + opts.price_range)*price])
   call_strikes = []
   for i in range(2):
-    for k in sorted(data[1].keys()):
-      print "=====", k, "====="
+    for k in sorted(data[i].keys()):
       for s in data[i][k]:
-        print s.__json__()
         if s.isCall():
           call_strikes.append(s)
+
   call_vols(call_strikes, 0.035)
+  for s in call_strikes:
+    print s.__json__()
+
 
 
 if __name__ == '__main__':
