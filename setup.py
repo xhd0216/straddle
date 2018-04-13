@@ -7,7 +7,7 @@ setup(
     url='https://github.com/xhd0216/straddle',
     packages=find_packages(),
     package_data={
-      '':['*.json', '*.html', '*.R', '*.cnf', '*.sh']
+      '':['*.json', '*.html', '*.R', '*.cnf', '*.sh', '*.txt']
     },
     entry_points={
       'console_scripts': [

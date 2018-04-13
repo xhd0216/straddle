@@ -14,11 +14,18 @@ bazel clean
 ```
 
 ## docker ##
+in `docker/`:
+
+  * start mysql database in docker:
 ```bash
-sudo docker build .
-sudo docker images
-sudo docker run -dit --name straddle-image [image ID]
-sudo docker exec -it straddle-image /bin/bash
+    bash ./start-up.sh
+```
+  * start docker container:
+```bash
+    sudo docker build .
+    sudo docker images
+    sudo docker run -dit --name straddle-image [image ID]
+    sudo docker exec -it straddle-image /bin/bash
 ```
 
 ## known issues: ##
