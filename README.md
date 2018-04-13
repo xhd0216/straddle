@@ -23,4 +23,4 @@ sudo docker exec -it straddle-image /bin/bash
 
 ## known issues: ##
 
-  * [marketwatch](https://marketwatch.com) won't allow tlsv1 connection. if openssl version <= 0.9.8, upgrade `openssl` to >= 1.0.1. or, use docker.
+  * [marketwatch](https://www.marketwatch.com) won't allow tlsv1 connection. if openssl version <= 0.9.8, upgrade `openssl` to >= 1.0.1. or, use docker.
