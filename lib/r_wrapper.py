@@ -22,13 +22,13 @@ Elasticity 31.19259480
 
 def par(output):
   """ parse the output of greek """
-	lines = output.split('\n')
-	res = dict()
-	for line in lines:
-		lin = line.split()
-		if len(lin) > 1:
-			res[lin[0].strip()] = float(lin[1])
-	return res
+  lines = output.split('\n')
+  res = dict()
+  for line in lines:
+    lin = line.split()
+    if len(lin) > 1:
+      res[lin[0].strip()] = float(lin[1])
+  return res
 
 
 def greeks(arg_dicts, vol=None, rate=None):

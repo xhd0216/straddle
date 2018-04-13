@@ -16,4 +16,13 @@ RUN \
     cd /repos && \
     git clone --depth=1 https://github.com/xhd0216/straddle.git && \
     cd straddle && \
-    sudo python setup.py install	
+    sudo python setup.py install
+RUN yum -y install crontabs
+
+RUN sed -i -e '/pam_loginuid.so/s/^/#/' /etc/pam.d/crond
+ADD cron_txt /etc/cron.d/cron_test
+RUN chmod 644 /etc/cron.d/cron_test
+
+RUN crontab /etc/cron.d/cron_test
+
+CMD crond && tail -f /dev/null
