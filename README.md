@@ -16,8 +16,12 @@ bazel test //...
 bazel clean
 
 ## docker ##
+```bash
 sudo docker build .
-
+sudo docker images
+sudo docker run -dit --name straddle-image [image ID]
+sudo exec -it straddle-image /bin/bash
+```
 
 ## known issues: ##
 

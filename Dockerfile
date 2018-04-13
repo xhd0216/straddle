@@ -4,11 +4,11 @@ RUN yum -y install sudo git make
 RUN yum -y --enablerepo=extras install epel-release
 RUN yum -y install python-pip
 RUN yum -y install R
-RUN yum -y install openssl wget
+RUN yum -y install openssl wget echo libcurl-devel
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
 RUN mkdir -p /repos/Rlibs
-RUN wget https://cran.r-project.org/src/contrib/derivmkts_0.2.2.tar.gz
-RUN wget https://cran.rstudio.com/src/contrib/mnormt_1.5-5.tar.gz
-RUN R CMD INSTALL --library=/repos/Rlibs mnormt_1.5-5.tar.gz derivmkts_0.2.2.tar.gz
+RUN Rscript -e "install.packages('derivmkts')"
+RUN Rscript -e "install.packages('tseries')"
 RUN pip install setuptools
 RUN yum install -y MySQL-python
 ADD https://api.github.com/repos/xhd0216/straddle/git/refs/heads version.json

@@ -21,6 +21,7 @@ Elasticity 31.19259480
 
 
 def par(output):
+  """ parse the output of greek """
 	lines = output.split('\n')
 	res = dict()
 	for line in lines:
@@ -40,7 +41,8 @@ def greeks(arg_dicts, vol=None, rate=None):
     assert 'rate' in arg_dicts[0]
 
   dir_path = os.path.dirname(os.path.realpath(__file__))  
-  p = Popen(["Rscript", os.path.join(dir_path, "greeks.R")], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  p = Popen(["Rscript", os.path.join(dir_path, "greeks.R")],
+            stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
   for adi in arg_dicts:
     if vol is not None:
@@ -64,10 +66,16 @@ def greeks(arg_dicts, vol=None, rate=None):
     exit(2)
 
 
-def call_vols(strike_list, rate):
+def get_fair_value(s):
+  """ given strike s, return the value to calculate the imp vol """
+  return s.getKey('ask')
+
+
+def call_vols(strike_list, rate, fair_value=get_fair_value):
   """ given list of strikes, calculate the implied vols """
   dir_path = os.path.dirname(os.path.realpath(__file__))
-  p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+  p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")],
+            stdin=PIPE, stdout=PIPE, stderr=PIPE)
   para_str = ''
   for sl in strike_list:
     para_str += '%s %s %s %s %s\n' % (
@@ -76,7 +84,7 @@ def call_vols(strike_list, rate):
                rate, # interest rate
                sl.getTimeToExp() / 365.0,
                ## don't use 'last', it maybe out of date.
-               sl.getKey('ask'))
+               get_fair_value(sl))
   output = p.communicate(input=para_str)
   rc = p.returncode
   if output[1] != '':
