@@ -23,7 +23,7 @@ in `docker/`:
   * start docker container:
 ```bash
     sudo docker build .
-    sudo docker images
+    sudo docker images # find image ID
     sudo docker run -dit --name straddle-image [image ID]
     sudo docker exec -it straddle-image /bin/bash
 ```
