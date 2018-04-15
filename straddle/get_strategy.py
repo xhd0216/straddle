@@ -68,7 +68,7 @@ def main():
   parser.add_argument('--log-mode', default='a',
                       help='log file mode (a or w)')
   parser.add_argument('--log-level', default='debug', help='log level')
-  parser.add_argument('--db-cnf', default=False,
+  parser.add_argument('--db-cnf',
                       help='if db config file is given, write results to db')
 
   opts = parser.parse_args()
@@ -94,17 +94,22 @@ def main():
                             [opts.TTE_min, opts.TTE_max],
                             [(1 - opts.price_range)*price,
                              (1 + opts.price_range)*price])
+  # select all calls
   call_strikes = []
   for i in range(2):
     for k in sorted(data[i].keys()):
-      for s in data[i][k]:
-        if s.isCall():
-          call_strikes.append(s)
+      call_strikes += data[i][k]
 
-  call_vols(call_strikes, 0.035)
-  for s in call_strikes:
-    print s.__json__()
+  # calculate implied vol
+  call_vols(call_strikes, rate=0.035)
 
+  # TODO: find all irons
+  # step a: find in the money
+  # step b: find out of money
+  all_calls = data[1]
+  for k in all_calls:
+    in_money = filter(all_calls[k], lambda x: x.getKey('strike') <= x.getKey('price'))
+    out_money = filter(all_calls[k], lambda x: x.getKey('strike') > x.getKey('price'))
 
 
 if __name__ == '__main__':

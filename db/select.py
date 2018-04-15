@@ -4,6 +4,7 @@
 
 import datetime
 import logging
+import os
 import sqlalchemy
 from sqlalchemy import orm
 
@@ -59,8 +60,7 @@ def get_query_latest(table_name, underlying, k_list, exps, call_list):
 def get_latest_strikes(table_name, underlying, k_list, exps, call_list):
   """ get the latest strikes """
   query = get_query_latest('test_options', 'spy', [260], ['2018-04-09', '2018-04-18'], True)
-  print query
-  conn = create_mysql_session('./test-options.cnf')
+  conn = create_mysql_session()
   res = conn.execute(query)
   strikes = []
   for r in res:
@@ -89,4 +89,5 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  print __file__
+  #main()

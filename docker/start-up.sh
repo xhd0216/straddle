@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+# TODO: docker pull mysql
+
 # if container already exists
 running=$(sudo docker ps -f "name=test-mysql" -q)
 if [[ $running ]]; then 
@@ -21,6 +23,7 @@ if [ ! -f $SCRIPTPATH/cnf-template.cnf ]; then
   exit 2
 fi
 
+# TODO: check if pwgen exists
 # create password
 password=$(pwgen 15 1)
 
