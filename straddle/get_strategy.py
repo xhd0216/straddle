@@ -110,6 +110,22 @@ def main():
   for k in all_calls:
     in_money = filter(all_calls[k], lambda x: x.getKey('strike') <= x.getKey('price'))
     out_money = filter(all_calls[k], lambda x: x.getKey('strike') > x.getKey('price'))
+    print "======", k, "======"
+
+    # pretty print
+    l = len(in_money)
+    template = '|'
+    for i in range(l+1):
+      template += "\{%d:8\}|" % i
+    print template.format('strike', *[x.getKey('strike') for x in in_money])
+    for i in range(l):
+      line = ['%f' % in_money[i].getKey('strike')]
+      for j in range(l):
+        if j <= i:
+          line.append('')
+        else:
+          line.append('%f' % in_money[i].getKey('bid') - in_money[j].getKey('ask'))
+      print template.format(*line)
 
 
 if __name__ == '__main__':
