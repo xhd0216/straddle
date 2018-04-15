@@ -40,7 +40,7 @@ class Strike(objects):
     current = self.getKey('query_time')
     if current is None:
       current = datetime.datetime.now()
-    return (self.getExpirationDate() - current).days
+    return (self.getExpirationDate().date() - current.date()).days
 
   def getStrike(self):
     return self.getKey('strike')

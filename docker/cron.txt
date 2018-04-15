@@ -2,6 +2,6 @@ SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
 
-* * * * * echo "hello" >> /hellp.txt
-
+* * * * * echo "hello" >> /hello.txt
+date >> /hellp.txt
 

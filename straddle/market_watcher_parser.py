@@ -68,12 +68,20 @@ def getStrikeInstance(symb, exp, price, call, row):
 
   if oi != DATA_PLACE_HOLDER and oi != '':
     miscc['open_int'] = oi
+  else:
+    miscc['open_int'] = 0
   if ca != DATA_PLACE_HOLDER and ca != '':
     miscc['ask'] = ca
+  else:
+    miscc['ask'] = 0.0
   if cb != DATA_PLACE_HOLDER and cb != '':
     miscc['bid'] = cb
+  else:
+    miscc['bid'] = 0.0
   if cl != DATA_PLACE_HOLDER and cl != '':
     miscc['last'] = cl
+  else:
+    miscc['last'] = 0.0
   return create_strike(misc=miscc)
 
 

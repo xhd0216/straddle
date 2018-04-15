@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 
+from db.select import get_latest_strikes
 from lib.r_wrapper import call_vols
 from market_watcher_parser import getOptionMW
 from util.logger import set_logger
@@ -80,12 +81,20 @@ def main():
 
   logging.info('retrieving options for %s', opts.symbol)
 
+  """ get from webpage
   res = getOptionMW(opts.symbol)
   if res is None:
     # getOptionMW may return None because of page open failure
     logging.error('no data retrieved')
     return
   logging.info('%d data received', len(res))
+  """
+
+  res = get_latest_strikes(table_name='test_options',
+                           underlying='spy',
+                           k_list=[0, 10000],
+                           exps=[opts.TTE_min, opts.TTE_max],
+                           call_list=[True])
 
   # data preprocessing
   # step 1, filter the time range
@@ -108,23 +117,28 @@ def main():
   # step b: find out of money
   all_calls = data[1]
   for k in all_calls:
-    in_money = filter(all_calls[k], lambda x: x.getKey('strike') <= x.getKey('price'))
-    out_money = filter(all_calls[k], lambda x: x.getKey('strike') > x.getKey('price'))
+    in_money = filter(lambda x: x.getKey('strike') <= x.getKey('price'), all_calls[k])
+    out_money = filter(lambda x: x.getKey('strike') > x.getKey('price'), all_calls[k])
     print "======", k, "======"
 
     # pretty print
     l = len(in_money)
     template = '|'
     for i in range(l+1):
-      template += "\{%d:8\}|" % i
+      template += "{%d:>6}|" % i
     print template.format('strike', *[x.getKey('strike') for x in in_money])
     for i in range(l):
-      line = ['%f' % in_money[i].getKey('strike')]
+      line = [in_money[i].getKey('strike')]
       for j in range(l):
         if j <= i:
           line.append('')
         else:
-          line.append('%f' % in_money[i].getKey('bid') - in_money[j].getKey('ask'))
+          # print expected return / cost
+          cost = in_money[i].getKey('ask') - in_money[j].getKey('bid')
+          if cost == 0:
+            line.append('NA')
+          else:
+            line.append('%.2f' % ((in_money[j].getKey('strike') - in_money[i].getKey('strike'))/cost))
       print template.format(*line)
 
 
