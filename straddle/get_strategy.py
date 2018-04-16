@@ -53,6 +53,33 @@ def data_preprocessing(data_in,
   return res
 
 
+def pretty_print(rows, in_the_money):
+  """ pretty print """
+  l = len(rows)
+  template = '|'
+  for i in range(l+1):
+    template += "{%d:>6}|" % i
+  print template.format('strike', *[x.getKey('strike') for x in rows])
+
+  for i in range(l):
+    line = [rows[i].getKey('strike')]
+    for j in range(l):
+      if j <= i:
+        line.append('')
+      else:
+        # print expected return / cost
+        if in_the_money:
+          cost = rows[i].getKey('ask') - rows[j].getKey('bid')
+        else:
+          cost = -rows[i].getKey('bid') + rows[j].getKey('ask')
+        if cost == 0:
+          line.append('NA')
+        else:
+          # line.append('%.2f' % ((rows[j].getKey('strike') - rows[i].getKey('strike'))/cost))
+          line.append('%.2f' % cost)
+    print template.format(*line)
+
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--symbol', required=True)
@@ -120,26 +147,8 @@ def main():
     in_money = filter(lambda x: x.getKey('strike') <= x.getKey('price'), all_calls[k])
     out_money = filter(lambda x: x.getKey('strike') > x.getKey('price'), all_calls[k])
     print "======", k, "======"
-
-    # pretty print
-    l = len(in_money)
-    template = '|'
-    for i in range(l+1):
-      template += "{%d:>6}|" % i
-    print template.format('strike', *[x.getKey('strike') for x in in_money])
-    for i in range(l):
-      line = [in_money[i].getKey('strike')]
-      for j in range(l):
-        if j <= i:
-          line.append('')
-        else:
-          # print expected return / cost
-          cost = in_money[i].getKey('ask') - in_money[j].getKey('bid')
-          if cost == 0:
-            line.append('NA')
-          else:
-            line.append('%.2f' % ((in_money[j].getKey('strike') - in_money[i].getKey('strike'))/cost))
-      print template.format(*line)
+    pretty_print(in_money, True)
+    pretty_print(out_money, False)
 
 
 if __name__ == '__main__':

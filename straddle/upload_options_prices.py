@@ -13,12 +13,19 @@ from straddle.market_watcher_parser import getOptionMW
 from util.logger import set_logger
 
 
+
 def filter_out_zero(rows):
   """ filter out zero ask/bid/open_int """
-  res = filter(lambda x: x.getKey('ask') != 0, rows)
-  res = filter(lambda x: x.getKey('bid') != 0, res)
-  res = filter(lambda x: x.getKey('open_int') != 0, res)
-  return res
+  fields = ['ask', 'bid', 'open_int']
+  def field_not_empty(o):
+    """ check if numeric fields are empty """
+    for f in fields:
+      r = o.getKey(f)
+      if r is None or r == 0:
+        return False
+    return True
+
+  return filter(field_not_empty, rows)
 
 
 def main():

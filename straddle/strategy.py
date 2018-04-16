@@ -15,7 +15,7 @@ default_date_format = "%Y-%m-%d"
 
 strike_field = {'underlying':str,
                 'strike':float,
-                'expiration':datetime.datetime,
+                'expiration':datetime.date,
                 'price':float,
                 'is_call':bool}
 
@@ -40,7 +40,7 @@ class Strike(objects):
     current = self.getKey('query_time')
     if current is None:
       current = datetime.datetime.now()
-    return (self.getExpirationDate().date() - current.date()).days
+    return (self.getExpirationDate() - current.date()).days
 
   def getStrike(self):
     return self.getKey('strike')
@@ -55,7 +55,10 @@ class Strike(objects):
     return datetime.datetime.strftime(self.getKey('expiration'), format_str)
 
   def getExpirationDate(self):
-    return self.getKey('expiration')
+    res = self.getKey('expiration')
+    if isinstance(res, datetime.datetime):
+      return res.date()
+    return res
 
   def getAsk(self):
     return self.getKey('ask')
