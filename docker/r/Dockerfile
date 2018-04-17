@@ -11,13 +11,12 @@ RUN mkdir -p /repos/Rlibs
 RUN Rscript -e "install.packages('derivmkts')"
 RUN Rscript -e "install.packages('tseries')"
 
-RUN apt-get install libmysqlclient-dev
-RUN apt-get install python-pip
-RUN apt-get install git
+RUN apt-get install -y libmysqlclient-dev
+RUN apt-get install -y python-pip
+RUN apt-get install -y git
 
 ADD https://api.github.com/repos/xhd0216/straddle/git/refs/heads version.json
 RUN \
-    mkdir /repos && \
     cd /repos && \
     git clone --depth=1 https://github.com/xhd0216/straddle.git && \
     cd straddle && \
