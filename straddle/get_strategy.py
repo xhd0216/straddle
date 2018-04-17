@@ -82,6 +82,8 @@ def pretty_print(rows, in_the_money):
 
 def main():
   parser = argparse.ArgumentParser()
+  parser.add_argument('--from-web', action='store_true',
+                      help='get data from web')
   parser.add_argument('--symbol', required=True)
   parser.add_argument('--TTE-min', default=1, type=int,
                       help='min time to expire')
@@ -98,6 +100,7 @@ def main():
   parser.add_argument('--log-level', default='debug', help='log level')
   parser.add_argument('--db-cnf',
                       help='if db config file is given, write results to db')
+  parser.add_argument('--query-time', help='which time to query')
 
   opts = parser.parse_args()
   if opts.log_file:
@@ -108,20 +111,20 @@ def main():
 
   logging.info('retrieving options for %s', opts.symbol)
 
-  """ get from webpage
-  res = getOptionMW(opts.symbol)
-  if res is None:
-    # getOptionMW may return None because of page open failure
-    logging.error('no data retrieved')
-    return
-  logging.info('%d data received', len(res))
-  """
-
-  res = get_latest_strikes(table_name='test_options',
-                           underlying='spy',
-                           k_list=[0, 10000],
-                           exps=[opts.TTE_min, opts.TTE_max],
-                           call_list=[True])
+  if opts.from_web: 
+    res = getOptionMW(opts.symbol)
+    if res is None:
+      # getOptionMW may return None because of page open failure
+      logging.error('no data retrieved')
+      return
+    logging.info('%d data received', len(res))
+  else:
+    res = get_latest_strikes(table_name='test_options',
+                             underlying='spy',
+                             k_list=[0, 10000],
+                             exps=[opts.TTE_min, opts.TTE_max],
+                             call_list=[True],
+                             query_time=opts.query_time)
 
   # data preprocessing
   # step 1, filter the time range

@@ -53,13 +53,29 @@ def get_day_range(a, b, date_format='%Y-%m-%d'):
   return [datetime.datetime.strftime(x, date_format) for x in res]
 
 
+SELECT_QUERY_TIME = """
+  SELECT %s
+  FROM %s t
+  WHERE t.underlying = '%s'
+  AND %s
+  AND t.expiration >= '%s' AND t.expiration <= '%s'
+  AND t.is_call IN (%s)
+  AND t.query_time >= '%s' AND t.query_time < '%s';
+"""
+
 def get_query_latest(table_name='test_options',
                      underlying='spy',
                      k_list=None,
                      exps=None,
                      call_list=[True],
-                     strike_in=False):
-  """ get latest strikes for given condition """
+                     strike_in=False,
+                     query_time=None):
+  """ get latest strikes for given condition
+      if query_time is not none, it should be a str
+      like " %Y-%m-%d %H:%M:%S" (PDT).
+      return the data around that time today
+  """
+  print "========", query_time
   if not isinstance(k_list, list):
     k_list = [k_list]
   if not isinstance(exps, list):
@@ -74,17 +90,27 @@ def get_query_latest(table_name='test_options',
   else:
     strike_str = 't.strike >= %s AND t.strike <= %s' % (k_list[0], k_list[1])
   call_str = ','.join([str(x) for x in call_list])
-  query = SELECT_LATEST % (select_str, table_name, table_name, underlying, strike_str, exps[0], exps[1], call_str)
+  if query_time is None:
+    query = SELECT_LATEST % (select_str, table_name, table_name, underlying, strike_str, exps[0], exps[1], call_str)
+  else:
+    base_time = datetime.datetime.strptime(query_time, '%Y-%m-%d %H:%M:%S')
+    qt = [base_time - datetime.timedelta(minutes=15), base_time + datetime.timedelta(minutes=15)]
+    qt = [datetime.datetime.strftime(x, '%Y-%m-%d %H:%M:%S') for x in qt]
+    query = SELECT_QUERY_TIME % (select_str, table_name, underlying, strike_str,
+                                 exps[0], exps[1], call_str, qt[0], qt[1])
+  print query
   return query
 
 
-def get_latest_strikes(table_name, underlying, k_list, exps, call_list):
+def get_latest_strikes(table_name, underlying, k_list, exps, call_list, query_time):
   """ get the latest strikes """
   query = get_query_latest(table_name,
                            underlying,
                            k_list,
                            exps,
-                           call_list)
+                           call_list,
+                           False,
+                           query_time)
   conn = create_mysql_session()
   res = conn.execute(query)
   strikes = []
