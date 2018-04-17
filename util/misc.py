@@ -110,7 +110,6 @@ date_origin = datetime.date(1970, 1, 1)
 
 def getRoundDate(d):
   """ given a datetime, return only the date """
-  assert isinstance(d, datetime.datetime)
   return datetime.date(d.year, d.month, d.day)
 
 def getNowDate():
