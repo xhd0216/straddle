@@ -53,7 +53,7 @@ def data_preprocessing(data_in,
   return res
 
 
-def pretty_print(rows, in_the_money):
+def pretty_print(rows, left):
   """ pretty print """
   l = len(rows)
   template = '|'
@@ -67,11 +67,12 @@ def pretty_print(rows, in_the_money):
       if j <= i:
         line.append('')
       else:
-        # print expected return / cost
-        if in_the_money:
-          cost = rows[i].getKey('ask') - rows[j].getKey('bid')
+        if left:
+          # calculate left legs
+          # cost <- influx
+          cost = -rows[i].getKey('ask') + rows[j].getKey('bid')
         else:
-          cost = -rows[i].getKey('bid') + rows[j].getKey('ask')
+          cost = +rows[i].getKey('bid') - rows[j].getKey('ask')
         if cost == 0:
           line.append('NA')
         else:
@@ -123,7 +124,7 @@ def main():
                              underlying='spy',
                              k_list=[0, 10000],
                              exps=[opts.TTE_min, opts.TTE_max],
-                             call_list=[True],
+                             call_list=[False, True],
                              query_time=opts.query_time)
 
   # data preprocessing
@@ -143,15 +144,14 @@ def main():
   call_vols(call_strikes, rate=0.035)
 
   # TODO: find all irons
-  # step a: find in the money
-  # step b: find out of money
-  all_calls = data[1]
-  for k in all_calls:
-    in_money = filter(lambda x: x.getKey('strike') <= x.getKey('price'), all_calls[k])
-    out_money = filter(lambda x: x.getKey('strike') > x.getKey('price'), all_calls[k])
+  # step a: find out of money puts
+  # step b: find out of money calls
+  for k in data[0]:
+    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
+    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
     print "======", k, "======"
-    pretty_print(in_money, True)
-    pretty_print(out_money, False)
+    pretty_print(left, True)
+    pretty_print(right, False)
 
 
 if __name__ == '__main__':
