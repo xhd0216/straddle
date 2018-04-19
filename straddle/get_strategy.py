@@ -146,7 +146,7 @@ def main():
   # TODO: find all irons
   # step a: find out of money puts
   # step b: find out of money calls
-  for k in data[0]:
+  for k in sorted(data[0]):
     left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
     right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
     print "======", k, "======"
