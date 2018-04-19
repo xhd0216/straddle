@@ -106,7 +106,7 @@ def getHistQuote(symbol, start='2017-01-01', force=False):
   today = datetime.datetime.strftime(today, '%Y-%m-%d')
   file_path = os.path.join(dir_path, symbol+today+'.csv')
   script_path = os.path.join(dir_path, 'hist_quote.R')
-  if not os.path.exists(file_path):
+  if force or not os.path.exists(file_path):
     p = Popen(["Rscript", script_path, symbol, start], stdin=PIPE,
               stdout=PIPE, stderr=PIPE)
     output = p.communicate(input='')
@@ -117,8 +117,11 @@ def getHistQuote(symbol, start='2017-01-01', force=False):
     if not os.path.exists(file_path):
       logging.error('error: csv file not found %s', file_path)
       return None
+  ret = None
   with open(file_path, 'r') as f:
-    pass
+    content = f.readlines()
+    ret = [x.split() for x in content]
+  return ret
 
 
 def test_implied_vol():
@@ -133,4 +136,5 @@ def test_implied_vol():
 
 
 if __name__ == '__main__':
-  test_implied_vol()
+  #test_implied_vol()
+  get_hist_quote(symbol='gdx', force=True)
