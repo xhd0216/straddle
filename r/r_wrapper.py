@@ -100,22 +100,24 @@ def call_vols(strike_list, rate, fair_value=get_fair_value):
   return 0
 
 
-def getHistQuote(symbol, start='2017-01-01', force=False):
+def get_hist_quote(symbol, start='2017-01-01', force=False):
   """ get historical quotes """
   today = datetime.datetime.now().date()
   today = datetime.datetime.strftime(today, '%Y-%m-%d')
-  file_path = os.path.join(dir_path, symbol+today+'.csv')
+  file_path = os.path.join(dir_path, '-'.join([symbol, start, today])+'.csv')
   script_path = os.path.join(dir_path, 'hist_quote.R')
   if force or not os.path.exists(file_path):
-    p = Popen(["Rscript", script_path, symbol, start], stdin=PIPE,
-              stdout=PIPE, stderr=PIPE)
+    p = Popen(["Rscript", script_path, symbol, start, today],
+              stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output = p.communicate(input='')
     rc = p.returncode
-    if output[1] != '':
+    if rc != 0:
+      # if output[1] has warning but return code is 0, ignore warning
       logging.error('error in R, return code: %s, msg: %s', rc, output[1])
       return None
     if not os.path.exists(file_path):
-      logging.error('error: csv file not found %s', file_path)
+      logging.error('error: csv file %s not found, return code %s', 
+                    file_path, rc)
       return None
   ret = None
   with open(file_path, 'r') as f:
@@ -136,5 +138,5 @@ def test_implied_vol():
 
 
 if __name__ == '__main__':
-  #test_implied_vol()
-  get_hist_quote(symbol='gdx', force=True)
+  test_implied_vol()
+  #ret = get_hist_quote(symbol='gdx', force=True)
