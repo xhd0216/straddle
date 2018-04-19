@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 
 from straddle.strategy import create_strike
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # the output should look like this:
 """
@@ -40,7 +41,6 @@ def greeks(arg_dicts, vol=None, rate=None):
   if rate is None:
     assert 'rate' in arg_dicts[0]
 
-  dir_path = os.path.dirname(os.path.realpath(__file__))  
   p = Popen(["Rscript", os.path.join(dir_path, "greeks.R")],
             stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
@@ -73,11 +73,13 @@ def get_fair_value(s):
 
 def call_vols(strike_list, rate, fair_value=get_fair_value):
   """ given list of strikes, calculate the implied vols """
-  dir_path = os.path.dirname(os.path.realpath(__file__))
   p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")],
             stdin=PIPE, stdout=PIPE, stderr=PIPE)
   para_str = ''
   for sl in strike_list:
+    # avoid error
+    if sl.getKey('ask') == 0 or sl.getKey('open_int') == 0:
+      continue
     para_str += '%s %s %s %s %s\n' % (
                sl.getKey('price'),
                sl.getKey('strike'),
@@ -96,6 +98,27 @@ def call_vols(strike_list, rate, fair_value=get_fair_value):
     vol = lines[i].split()[1]
     strike_list[i].addKey('impvol', float(vol))
   return 0
+
+
+def getHistQuote(symbol, start='2017-01-01', force=False):
+  """ get historical quotes """
+  today = datetime.datetime.now().date()
+  today = datetime.datetime.strftime(today, '%Y-%m-%d')
+  file_path = os.path.join(dir_path, symbol+today+'.csv')
+  script_path = os.path.join(dir_path, 'hist_quote.R')
+  if not os.path.exists(file_path):
+    p = Popen(["Rscript", script_path, symbol, start], stdin=PIPE,
+              stdout=PIPE, stderr=PIPE)
+    output = p.communicate(input='')
+    rc = p.returncode
+    if output[1] != '':
+      logging.error('error in R, return code: %s, msg: %s', rc, output[1])
+      return None
+    if not os.path.exists(file_path):
+      logging.error('error: csv file not found %s', file_path)
+      return None
+  with open(file_path, 'r') as f:
+    pass
 
 
 def test_implied_vol():
