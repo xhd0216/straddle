@@ -3,7 +3,7 @@ import logging
 import sys
 
 from db.select import get_latest_strikes
-from lib.r_wrapper import call_vols
+from r.r_wrapper import call_vols
 from market_watcher_parser import getOptionMW
 from util.logger import set_logger
 
