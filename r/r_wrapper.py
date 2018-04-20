@@ -58,7 +58,6 @@ def greeks(arg_dicts, vol=None, rate=None):
       else:
         break
     print output
-    print "========="
   output = p.communicate(input='\n')
   # output[0] = stdout, output[1] = stderr
   rc = p.returncode
@@ -71,15 +70,13 @@ def get_fair_value(s):
   return s.getKey('ask')
 
 
-def call_vols(strike_list, rate, fair_value=get_fair_value):
+def call_vols(strike_list, rate, isCall=True, fair_value=get_fair_value):
   """ given list of strikes, calculate the implied vols """
-  p = Popen(["Rscript", os.path.join(dir_path, "call_vol.R")],
+  rscript = "call_vol.R" if isCall else "put_vol.R"
+  p = Popen(["Rscript", os.path.join(dir_path, rscript)],
             stdin=PIPE, stdout=PIPE, stderr=PIPE)
   para_str = ''
   for sl in strike_list:
-    # avoid error
-    if sl.getKey('ask') == 0 or sl.getKey('open_int') == 0:
-      continue
     para_str += '%s %s %s %s %s\n' % (
                sl.getKey('price'),
                sl.getKey('strike'),
@@ -91,12 +88,17 @@ def call_vols(strike_list, rate, fair_value=get_fair_value):
   rc = p.returncode
   if output[1] != '':
     logging.error('error in R, return code: %s, msg: %s', rc, output[1])
-    return rc
   lines = output[0].splitlines()
   assert len(lines) == len(strike_list)
   for i in range(len(lines)):
     vol = lines[i].split()[1]
-    strike_list[i].addKey('impvol', float(vol))
+    try:
+      vol = float(vol)
+    except:
+      logging.error('error in calculating imp vol: %s, strike=\n%s',
+                    lines[i], strike_list[i].__json__())
+      vol = 0.0
+    strike_list[i].addKey('impvol', vol)
   return 0
 
 

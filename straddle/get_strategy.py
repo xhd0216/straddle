@@ -81,6 +81,36 @@ def pretty_print(rows, left):
     print template.format(*line)
 
 
+def iron_table_print(data):
+  # step a: find out of money puts
+  # step b: find out of money calls
+  for k in sorted(data[0]):
+    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
+    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
+    print "======", k, left[0].getKey('price'), "======"
+    pretty_print(left, True)
+    pretty_print(right, False)
+
+
+def pretty_print_strikes(rows):
+  template = '|'
+  for i in range(len(rows)+1):
+    template += "{%d:>6}|" % i
+  print template.format('strike', *[x.getKey('strike') for x in rows])
+  print template.format('ask', *[x.getKey('ask') for x in rows])
+  print template.format('impvol', *['%.2f'%x.getKey('impvol') for x in rows])
+
+def strangle_table_print(data):
+  # step a: find out of money puts
+  # step b: find out of money calls
+  for k in sorted(data[0]):
+    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
+    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
+    print "=======", k, left[0].getKey('price'), "======"
+    pretty_print_strikes(left)
+    pretty_print_strikes(right)
+
+
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--from-web', action='store_true',
@@ -136,22 +166,19 @@ def main():
                              (1 + opts.price_range)*price])
   # select all calls
   call_strikes = []
-  for i in range(2):
-    for k in sorted(data[i].keys()):
-      call_strikes += data[i][k]
+  put_strikes = []
+  for k in sorted(data[1].keys()):
+    call_strikes += data[1][k]
+    put_strikes += data[0][k]
 
   # calculate implied vol
   call_vols(call_strikes, rate=0.035)
+  call_vols(put_strikes, rate=0.035, isCall=False)
 
-  # TODO: find all irons
-  # step a: find out of money puts
-  # step b: find out of money calls
-  for k in sorted(data[0]):
-    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
-    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
-    print "======", k, "======"
-    pretty_print(left, True)
-    pretty_print(right, False)
+  if opts.strategy == 'iron':
+    iron_table_print(data)
+  elif opts.strategy == 'strangle':
+    strangle_table_print(data)
 
 
 if __name__ == '__main__':

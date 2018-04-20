@@ -4,7 +4,7 @@ f <- file("stdin")
 open(f)
 while(length(line <- readLines(f, n=1)) > 0) {
   arr <- strsplit(line, "\\s+")
-  tryCatch(print(bscallimpvol(s=as.double(arr[[1]][1]),
+  tryCatch(print(bsputimpvol(s=as.double(arr[[1]][1]),
                               k=as.double(arr[[1]][2]),
                               r=as.double(arr[[1]][3]),
                               tt=as.double(arr[[1]][4]),

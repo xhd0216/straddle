@@ -75,7 +75,6 @@ def get_query_latest(table_name='test_options',
       like " %Y-%m-%d %H:%M:%S" (PDT).
       return the data around that time today
   """
-  print "========", query_time
   if not isinstance(k_list, list):
     k_list = [k_list]
   if not isinstance(exps, list):
@@ -98,7 +97,6 @@ def get_query_latest(table_name='test_options',
     qt = [datetime.datetime.strftime(x, '%Y-%m-%d %H:%M:%S') for x in qt]
     query = SELECT_QUERY_TIME % (select_str, table_name, underlying, strike_str,
                                  exps[0], exps[1], call_str, qt[0], qt[1])
-  print query
   return query
 
 
@@ -130,5 +128,4 @@ def main():
 
 
 if __name__ == '__main__':
-  print __file__
-  #main()
+  main()
