@@ -91,7 +91,7 @@ def fix_instance(a, t):
     res = fix_datetime(a)
     if res:
       if t == datetime.date:
-        return True, a.date()
+        return True, res.date()
       return True, res
     else:
       return False, None
