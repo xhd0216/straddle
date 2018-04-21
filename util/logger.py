@@ -15,7 +15,7 @@ def set_logger(level='debug', out=None, filename=None, mode='a'):
   logger = logging.getLogger()
   logger.setLevel(LOG_OPTIONS[level])
 
-  formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s',
+  formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(funcName)s: %(message)s',
                                 '%Y-%m-%d %H:%M:%S')
   if out is None:
     logger.popagate = False

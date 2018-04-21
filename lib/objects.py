@@ -37,7 +37,7 @@ class objects():
   def __json__(self, indent=4, sort_keys=True):
     """ dump data to json file """
     if not self.isValid():
-      return json.dumps({})
+      logging.error('object is not valid')
     return json.dumps(self.data,
                       sort_keys=sort_keys,
                       indent=indent,
@@ -52,10 +52,9 @@ class objects():
       if required:
         logging.error('missing required key %s', k)
       return not required
-
     b, a = fix_instance(self.data[k], t)
     if b == False:
-      logging.error("type error")
+      logging.error("type error, key=%s, val=%s, expected type=%s", k, a, t)
     elif a != None:
       # fix it.
       self.data[k] = a
@@ -79,7 +78,7 @@ class objects():
     for k in self.auxiliary.keys():
       b = self.__validate__(k, self.auxiliary[k], required=False)
       if not b:
-        logging.error("wrong type for key %s", k)
+        logging.error("wrong type: key %s, value %s, type %s", k, str(self.data[k]), str(self.auxiliary[k]))
         return False
     return True
 

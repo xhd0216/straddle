@@ -65,7 +65,6 @@ def getStrikeInstance(symb, exp, price, call, row):
   ca = getRowAsk(row ,call)
   cb = getRowBid(row ,call)
   cl = getRowLast(row ,call)
-
   if oi != DATA_PLACE_HOLDER and oi != '':
     miscc['open_int'] = oi
   else:

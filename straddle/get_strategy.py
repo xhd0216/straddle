@@ -151,11 +151,14 @@ def main():
     logging.info('%d data received', len(res))
   else:
     res = get_latest_strikes(table_name='test_options',
-                             underlying='spy',
+                             underlying=opts.symbol,
                              k_list=[0, 10000],
                              exps=[opts.TTE_min, opts.TTE_max],
                              call_list=[False, True],
                              query_time=opts.query_time)
+    if not len(res):
+      logging.error('no result (from db)')
+      exit(0)
 
   # data preprocessing
   # step 1, filter the time range
@@ -164,6 +167,7 @@ def main():
                             [opts.TTE_min, opts.TTE_max],
                             [(1 - opts.price_range)*price,
                              (1 + opts.price_range)*price])
+
   # select all calls
   call_strikes = []
   put_strikes = []

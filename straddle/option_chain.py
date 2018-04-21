@@ -93,14 +93,10 @@ def getOptionJson(symbol):
   g1 = g1[left:]
   right = find_matching(g1, '{')
   j = json.loads(g1[:right+1])
-  #print json.dumps(j, indent=3)
-  #print_struct(j, '')
 def GetOptionChainPage():
   udb = URLDB()
   earning_url = udb.getItem('earning').getURL()
   options_url = udb.getItem('options').getURL()
-  #print earning_url
-  #print options_url
   if earning_url == None:
     print 'failed to get url for earning'
     return
@@ -112,12 +108,8 @@ def GetOptionChainPage():
   p = earningParser()
   p.feed(g)
   for i in p.data:
-    # assert isinstance(i, earning)
     u = options_url % i.getSymbol()
-    # print u
-    # getOptionJson(i.getSymbol())
     k = GetURL(u)
     o = optionParser()
     o.feed(k)
   return
-#GetOptionChainPage()
