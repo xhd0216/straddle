@@ -8,10 +8,10 @@ import os
 import sqlalchemy
 from sqlalchemy import orm
 
-from mysql_connect import create_mysql_session
+from db.db_connect import TABLE_NAME, COLUMN_TYPES
+from db.mysql_connect import create_mysql_session
 from straddle.market_watcher_parser import getOptionMW
 from straddle.strategy import Strike
-from db.db_connect import TABLE_NAME, COLUMN_TYPES
 
 
 # key fields of a strike

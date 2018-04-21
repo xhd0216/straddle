@@ -2,6 +2,8 @@ import argparse
 import logging
 import sys
 
+from db.db_connect import insert_multiple
+from db.mysql_connect import create_mysql_session
 from db.select import get_latest_strikes
 from r.r_wrapper import call_vols
 from market_watcher_parser import getOptionMW
@@ -93,12 +95,14 @@ def iron_table_print(data):
 
 
 def pretty_print_strikes(rows):
+  print '-' * (7* (len(rows)+1) +1)
   template = '|'
   for i in range(len(rows)+1):
     template += "{%d:>6}|" % i
   print template.format('strike', *[x.getKey('strike') for x in rows])
   print template.format('ask', *[x.getKey('ask') for x in rows])
-  print template.format('impvol', *['%.2f'%x.getKey('impvol') for x in rows])
+  print template.format('impvol', *['%.2f' % x.getKey('impvol') for x in rows])
+  print '-' * (7* (len(rows)+1) +1)
 
 def strangle_table_print(data):
   # step a: find out of money puts
@@ -183,6 +187,11 @@ def main():
     iron_table_print(data)
   elif opts.strategy == 'strangle':
     strangle_table_print(data)
+  
+  if opts.db_cnf:
+    session = create_mysql_session(opts.db_cnf)
+    insert_multiple(session, call_strikes + put_strikes)
+    logging.info('%s data stored to database', opts.symbol)
 
 
 if __name__ == '__main__':
