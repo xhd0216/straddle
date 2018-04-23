@@ -35,6 +35,13 @@ def filter_strikes_list(strike_array, price_array):
   return filter(price_filter, strike_array)
 
 
+def filter_none_zero_strike(strike_array):
+  """ filter out strikes with zero ask, bid or open_int """
+  def not_none(x):
+    return x.getKey('ask') > 0.0 and x.getKey('bid') > 0.0 and x.getKey('open_int') > 0
+  return filter(not_none, strike_array)
+
+
 def data_preprocessing(data_in,
                        date_range,
                        price_range):
@@ -50,6 +57,7 @@ def data_preprocessing(data_in,
     res[ic][ds].append(tmp)
   for cp in range(2):
     for key in res[cp]: ## expiration dates
+      res[cp][key] = filter_none_zero_strike(res[cp][key])
       res[cp][key] = filter_price_range(res[cp][key], price_range[0], price_range[1])
 
   return res

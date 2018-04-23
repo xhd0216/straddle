@@ -7,6 +7,7 @@ import urllib2
 from straddle.strategy import *
 from util.networks import *
 from util.logger import set_logger
+from util.misc import fix_instance
 
 DATA_PLACE_HOLDER = '-'
 
@@ -204,7 +205,14 @@ class MarketWatcherParser(HTMLParser):
 
   def handle_data(self, data):
     if self.last_price_tag:
-      self.last_price = float(data)
+      b, a = fix_instance(data, float)
+      if not b:
+        logging.error('data type error, cannot convert %s to float', data)
+      else:
+        if a is not None:
+          self.last_price = a
+        else:
+          self.last_price = data
     expire_str = 'Expires '
     if self.b_expire and expire_str in data:
       ddd = data[data.find(expire_str) + len(expire_str):]
@@ -215,7 +223,14 @@ class MarketWatcherParser(HTMLParser):
         self.row[-1] = ts
       if self.stock_price:
         if 'Current price' not in data:
-          self.current_price = float(data)
+          b, a = fix_instance(data, float)
+          if not b:
+            logging.error('data type error, cannot convert %s to float', data)
+          else:
+            if a is not None:
+              self.current_price = a
+            else:
+              self.current_price = data
           if len(self.data) > 1:
             st = straddle(legs=[self.data[-1], self.data[-2]],
                           price = self.current_price)

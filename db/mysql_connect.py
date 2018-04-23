@@ -69,7 +69,7 @@ class mysqlSession():
 def create_mysql_session(cnf=None):
   if cnf is None:
     dir_name = os.path.dirname(os.path.realpath(__file__))
-    cnf = os.path.join(dir_name, '../docker/test-options.cnf')
+    cnf = os.path.join(dir_name, '../deployment/test-options.cnf')
   url = get_mysql_connect(cnf)
   if url is None:
     return None

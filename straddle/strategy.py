@@ -110,7 +110,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
     if not isinstance(res[k], strike_field[k]):
       b, a = fix_instance(res[k], strike_field[k])
       if not b:
-        logging.error("required field %s error %s", k, res[k])
+        logging.error("required field %s error %s, type %s", k, res[k], type(res[k]))
         return None
       res[k] = a
   # 5, check auxiliary fields

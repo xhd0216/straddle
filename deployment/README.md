@@ -28,7 +28,7 @@ To enter the mysql server docker container, do
 ```bash
 docker exec -it test-mysql /bin/bash
 ```
-To backup and restore database (user and password can be found in `test-options.cnf`:
+To backup and restore database (user, password and database can be found in `test-options.cnf`):
 ```bash
 docker exec test-mysql /usr/bin/mysqldump -u root --password=PW DATABASE > backup.sql
 cat backup.sql | docker exec -i test-mysql /usr/bin/mysql -u root --password=root DATABASE
