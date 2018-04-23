@@ -1,6 +1,6 @@
-#Deployments
+# Deployments #
 
-## deploy mysql server
+## deploy mysql server ##
 ```bash
 ./start-up.sh
 ```
@@ -9,7 +9,7 @@ it will create a file `test-options.cnf`, which will be used to connect to mysql
 mysql --defualts-extra-file=./test-options.cnf
 ```
 
-## deploy httpd server
+## deploy httpd server ##
 ```bash
 docker pull httpd # if not done yet
 docker images # find image id
