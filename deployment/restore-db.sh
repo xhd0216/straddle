@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: parameterize config file and sql file
+
 read -r thost tport tuser tpass tdb <<< $(awk -F"=" '{print $2}' test-options.cnf)
 
 # Restore
