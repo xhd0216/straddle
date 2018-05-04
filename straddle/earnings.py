@@ -14,6 +14,7 @@ class earning(objects):
     # eps is not required, could be '-'
     self.addField('eps', float, False)
     self.addField('date', datetime.datetime, False)
+    self.addField('market-cap', float, False)
 
     if isinstance(misc, dict):
       for i in misc.keys():

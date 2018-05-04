@@ -86,7 +86,6 @@ def pretty_print(rows, left):
         if cost == 0:
           line.append('NA')
         else:
-          # line.append('%.2f' % ((rows[j].getKey('strike') - rows[i].getKey('strike'))/cost))
           line.append('%.2f' % cost)
     print template.format(*line)
 
@@ -109,7 +108,8 @@ def pretty_print_strikes(rows):
     template += "{%d:>6}|" % i
   print template.format('strike', *[x.getKey('strike') for x in rows])
   print template.format('ask', *[x.getKey('ask') for x in rows])
-  print template.format('impvol', *['%.2f' % x.getKey('impvol') for x in rows])
+  if rows[0].getKey('impvol') is not None:
+    print template.format('impvol', *['%.2f' % x.getKey('impvol') for x in rows])
   print '-' * (7* (len(rows)+1) +1)
 
 def strangle_table_print(data):

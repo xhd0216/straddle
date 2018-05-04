@@ -31,7 +31,7 @@ def GetEarningsInRange(a, b):
       s = i[0]
       index = s.find('rel=')
       if index == -1:
-        print 'error loading symbol'
+        logging.error('error loading symbol')
         continue
       begin = s[index + 5:]
       end = begin.find('\"')
