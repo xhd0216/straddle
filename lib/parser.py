@@ -1,4 +1,6 @@
 from HTMLParser import *
+import logging
+
 
 class myParser(HTMLParser):
   def __init__(self):
@@ -21,6 +23,7 @@ class myParser(HTMLParser):
     if tag not in self.tags:
       ## encounter an end tag before a start tag, error
       ## give a warning, this is an html issue, don't handle
+      logging.warning("HTML error: meet an end tag %s without start tag", tag)
       self.tags[tag] = 1
     self.tags[tag] -= 1
 
