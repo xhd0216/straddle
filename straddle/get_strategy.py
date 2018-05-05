@@ -31,7 +31,7 @@ def filter_strikes_list(strike_array, price_array):
   """ price_array is a list of prices like [23, 26, 28, 31] """
   def price_filter(x):
     d = x.getStrike()
-    return d in price_array # don't need to care int or float
+    return d in price_array # don't care int or float
   return filter(price_filter, strike_array)
 
 
@@ -102,15 +102,35 @@ def iron_table_print(data):
     pretty_print(right, False)
 
 
+PRINT_GREEKS = ['impvol', 'delta', 'theta', 'vega']
+PRINT_BASIC = ['strike', 'ask', 'bid']
+
 def pretty_print_strikes(rows):
   print '-' * (7* (len(rows)+1) +1)
   template = '|'
   for i in range(len(rows)+1):
     template += "{%d:>6}|" % i
-  print template.format('strike', *[x.getKey('strike') for x in rows])
-  print template.format('ask', *[x.getKey('ask') for x in rows])
-  print template.format('impvol', *['%.2f' % x.getKey('impvol') for x in rows])
+  def format_helper(x, k):
+    """ helper func to print format """
+    r = x.getKey(k)
+    if not r:
+      return 'na'
+    else:
+      return '%.2f' % r
+  for key in PRINT_BASIC + PRINT_GREEKS:
+    print template.format(key, *[format_helper(x, key) for x in rows])
   print '-' * (7* (len(rows)+1) +1)
+
+
+def all_strikes_print(data):
+  for k in sorted(data[0]):
+    puts = data[0][k]
+    calls = data[1][k]
+    print "=======", calls[0].getKey('underlying'), " Calls", k, calls[0].getKey('price'), "======"
+    pretty_print_strikes(calls)
+    print "=======", calls[0].getKey('underlying'), "  Puts", k, calls[0].getKey('price'), "======"
+    pretty_print_strikes(puts)
+
 
 def strangle_table_print(data):
   # step a: find out of money puts
@@ -191,12 +211,14 @@ def main():
   call_vols(call_strikes, rate=0.035)
   call_vols(put_strikes, rate=0.035, isCall=False)
   for i in call_strikes + put_strikes:
-    print i.__json__()
+    logging.debug('strike:\n%s', i.__json__())
 
   if opts.strategy == 'iron':
     iron_table_print(data)
   elif opts.strategy == 'strangle':
     strangle_table_print(data)
+  else:
+    all_strikes_print(data)
   
   if opts.db_cnf:
     session = create_mysql_session(opts.db_cnf)
