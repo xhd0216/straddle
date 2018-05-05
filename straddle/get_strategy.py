@@ -90,12 +90,13 @@ def pretty_print(rows, left):
     print template.format(*line)
 
 
+AT_THE_MONEY_RATE = 0.05
 def iron_table_print(data):
   # step a: find out of money puts
   # step b: find out of money calls
   for k in sorted(data[0]):
-    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
-    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
+    left = filter(lambda x: x.getKey('strike') <= x.getKey('price')*(1+AT_THE_MONEY_RATE), data[0][k])
+    right = filter(lambda x: x.getKey('strike') > x.getKey('price')*(1-AT_THE_MONEY_RATE), data[1][k])
     print "======", k, left[0].getKey('price'), "======"
     pretty_print(left, True)
     pretty_print(right, False)
@@ -116,8 +117,8 @@ def strangle_table_print(data):
   # step a: find out of money puts
   # step b: find out of money calls
   for k in sorted(data[0]):
-    left = filter(lambda x: x.getKey('strike') <= x.getKey('price'), data[0][k])
-    right = filter(lambda x: x.getKey('strike') > x.getKey('price'), data[1][k])
+    left = filter(lambda x: x.getKey('strike') <= x.getKey('price')*(1+AT_THE_MONEY_RATE), data[0][k])
+    right = filter(lambda x: x.getKey('strike') > x.getKey('price')*(1-AT_THE_MONEY_RATE), data[1][k])
     print "=======", k, left[0].getKey('price'), "======"
     pretty_print_strikes(left)
     pretty_print_strikes(right)
@@ -190,6 +191,8 @@ def main():
   # calculate implied vol
   call_vols(call_strikes, rate=0.035)
   call_vols(put_strikes, rate=0.035, isCall=False)
+  for i in call_strikes + put_strikes:
+    print i.__json__()
 
   if opts.strategy == 'iron':
     iron_table_print(data)

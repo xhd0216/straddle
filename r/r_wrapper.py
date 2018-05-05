@@ -70,10 +70,15 @@ def greeks(arg_dicts, vol=None, rate=None):
 
 def get_fair_value(s):
   """ given strike s, return the value to calculate the imp vol """
-  return s.getKey('ask')
+  ask = s.getKey('ask')
+  if ask:
+    return ask
+  logging.error('no ask price, this is not a fair value')
+  return 0.0
 
 
-def call_vols(strike_list, rate, isCall=True, fair_value=get_fair_value):
+def call_vols(strike_list, rate, isCall=True,
+              fair_value=get_fair_value, current_time=None):
   """ given list of strikes, calculate the implied vols """
   rscript = "call_vol.R" if isCall else "put_vol.R"
   p = Popen(["Rscript", os.path.join(dir_path, rscript)],
@@ -84,7 +89,7 @@ def call_vols(strike_list, rate, isCall=True, fair_value=get_fair_value):
                sl.getKey('price'),
                sl.getKey('strike'),
                rate, # interest rate
-               sl.getTimeToExp() / 365.0,
+               sl.getTimeToExp(current=current_time) / 365.0,
                ## don't use 'last', it maybe out of date.
                get_fair_value(sl))
   output = p.communicate(input=para_str)
@@ -92,16 +97,23 @@ def call_vols(strike_list, rate, isCall=True, fair_value=get_fair_value):
   if output[1] != '':
     logging.error('error in R, return code: %s, msg: %s', rc, output[1])
   lines = output[0].splitlines()
+  logging.info('R returned lines: %s', lines)
   assert len(lines) == len(strike_list)
   for i in range(len(lines)):
-    vol = lines[i].split()[1]
+    rr = lines[i].split()
+    # the output looks like:
+    # [1]  0.21693314  0.47713613  0.02749360  0.26597111  0.07611315 -0.13925295
+    #      impvol      delta       gamma       vega        rho        theta
     try:
-      vol = float(vol)
+      strike_list[i].addKey('impvol', float(rr[1]))
+      strike_list[i].addKey('delta', float(rr[2]))
+      strike_list[i].addKey('gamma', float(rr[3]))
+      strike_list[i].addKey('vega', float(rr[4]))
+      strike_list[i].addKey('rho', float(rr[5]))
+      strike_list[i].addKey('theta', float(rr[6])) 
     except:
-      logging.error('error in calculating imp vol: %s, strike=\n%s',
+      logging.error('error in calculating imp vol and greeks: %s, strike=\n%s',
                     lines[i], strike_list[i].__json__())
-      vol = 0.0
-    strike_list[i].addKey('impvol', vol)
   return 0
 
 
@@ -203,15 +215,19 @@ def test_implied_vol():
   strike_list = []
   strike_list.append(create_strike({'ask':1.50}, 'spy', 267, datetime.datetime(2018, 4, 20), True, 266.23))
   strike_list.append(create_strike({'ask':2.50}, 'spy', 268, datetime.datetime(2018, 4, 20), True, 266.23))
-  call_vols(strike_list, 0.035)
+  # this should be an error
+  strike_list.append(create_strike({'ask':0.50}, 'spy', 265, datetime.datetime(2018, 4, 20), True, 266.23))
+  # this is an error
+  strike_list.append(create_strike({'bid':0.50}, 'spy', 265, datetime.datetime(2018, 4, 20), True, 266.23))
+  call_vols(strike_list, 0.035, current_time=datetime.datetime(2018, 3, 20))
   for s in strike_list:
     print s.__json__()
-  strike_list[0].getKey('impvol') == 0.1208742
-  strike_list[1].getKey('impvol') == 0.2191618
+  # assert strike_list[0].getKey('impvol') == 0.1208742
+  # assert strike_list[1].getKey('impvol') == 0.2191618
 
 
 if __name__ == '__main__':
-  get_realized_vol('panw')
-  #test_implied_vol()
+  #get_realized_vol('panw')
+  test_implied_vol()
   #ret = get_hist_quote(symbol='gdx', force=True)
 

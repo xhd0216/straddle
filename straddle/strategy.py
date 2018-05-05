@@ -36,8 +36,9 @@ class Strike(objects):
       for k in misc.keys():
         self.data[k] = misc[k]
 
-  def getTimeToExp(self):
-    current = self.getKey('query_time')
+  def getTimeToExp(self, current=None):
+    if current is None:
+      current = self.getKey('query_time')
     if current is None:
       current = datetime.datetime.now()
     return (self.getExpirationDate() - current.date()).days
