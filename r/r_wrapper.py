@@ -70,11 +70,7 @@ def greeks(arg_dicts, vol=None, rate=None):
 
 def get_fair_value(s):
   """ given strike s, return the value to calculate the imp vol """
-  ask = s.getKey('ask')
-  if ask:
-    return ask
-  logging.error('no ask price, this is not a fair value')
-  return 0.0
+  return s.getKey('ask', 0.0)
 
 
 def call_vols(strike_list, rate, isCall=True,
@@ -97,20 +93,20 @@ def call_vols(strike_list, rate, isCall=True,
   if output[1] != '':
     logging.error('error in R, return code: %s, msg: %s', rc, output[1])
   lines = output[0].splitlines()
-  logging.info('R returned lines: %s', lines)
+  logging.debug('R returned lines: %s', lines)
   assert len(lines) == len(strike_list)
   for i in range(len(lines)):
     rr = lines[i].split()
     # the output looks like:
-    # [1]  0.21693314  0.47713613  0.02749360  0.26597111  0.07611315 -0.13925295
-    #      impvol      delta       gamma       vega        rho        theta
+    # 0.21693314  0.47713613  0.02749360  0.26597111  0.07611315 -0.13925295
+    # impvol      delta       gamma       vega        rho        theta
     try:
-      strike_list[i].addKey('impvol', float(rr[1]))
-      strike_list[i].addKey('delta', float(rr[2]))
-      strike_list[i].addKey('gamma', float(rr[3]))
-      strike_list[i].addKey('vega', float(rr[4]))
-      strike_list[i].addKey('rho', float(rr[5]))
-      strike_list[i].addKey('theta', float(rr[6])) 
+      strike_list[i].addKey('impvol', float(rr[0]))
+      strike_list[i].addKey('delta', float(rr[1]))
+      strike_list[i].addKey('gamma', float(rr[2]))
+      strike_list[i].addKey('vega', float(rr[3]))
+      strike_list[i].addKey('rho', float(rr[4]))
+      strike_list[i].addKey('theta', float(rr[5])) 
     except:
       logging.error('error in calculating imp vol and greeks: %s, strike=\n%s',
                     lines[i], strike_list[i].__json__())

@@ -13,7 +13,7 @@ while(length(line <- readLines(f, n=1)) > 0) {
   tryCatch({
             iv <- bscallimpvol(s, k, r, tt, d, price)
             gr <- greeks(bscall(s, k, iv, r, tt, d))
-            print(c(iv, gr[2], gr[3], gr[4], gr[5], gr[6]))
+            cat(c(iv, gr[2], gr[3], gr[4], gr[5], gr[6]), '\n')
             #     impvol, delta, gamma, vega, rho, theta
          },
          error=function(e){ NA },

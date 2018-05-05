@@ -82,9 +82,9 @@ class objects():
         return False
     return True
 
-  def getKey(self, key):
+  def getKey(self, key, default_value=None):
     """ get key from data """
-    return self.data.get(key)
+    return self.data.get(key, default_value)
 
   def addKey(self, key, val, replace=True):
     """ write (key, val) to data """
