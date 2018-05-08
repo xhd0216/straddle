@@ -122,6 +122,60 @@ def pretty_print_strikes(rows):
   print '-' * (7* (len(rows)+1) +1)
 
 
+def short_bufferfly_print(data):
+  """ print short butterfly """
+
+
+def find_at_the_money(strikes):
+  """ return the four at-the-money indexes """
+  if not strikes:
+    logging.debug('empty input array')
+    return None
+  n = len(strikes)
+  price = strikes[0].getKey('price')
+  if not price:
+    logging.error('cannot find price')
+    return None
+  if n <= 4:
+    return range(n)
+
+  def helper_lambda(x):
+    """ helper function to get option strike """
+    return x.getKey('strike')
+
+  index = binary_search(strikes, price, 0, n-1, helper_lambda)
+  if index is None:
+    logging.error('cannot find at the money strikes, price=%.2f', price)
+    # it is possible: all strikes are below prices.
+    return [n-2, n-1]
+
+  if index == 0:
+    logging.error('did not see strikes below price. price=%.2f, closest strike=%.2f', price, helper_lambda(strikes[index]))
+    return [0, 1]
+  if index == 1:
+    return [0, 1, 2]
+
+  if index == n - 1:
+    logging.warning('did not see strikes above price. price=%.2f, closest strike=%.2f', price, helper_lambda(strikes[index]))
+    return [index - 2, index - 1, index]
+
+  return [index-2, index-1, index, index+1]
+  
+    
+    
+     
+
+
+def pretty_print_short_condor(data, gap=0.0, spread=1.0):
+  """ pretty print short condor or short butterfly """
+  """
+      short condor: -1 put +1 put +1 call -1 call
+      gap: gap between the +put and +call
+      spread: gap between the -put and +put, and between +call and -call
+  """
+
+
+
 def all_strikes_print(data):
   for k in sorted(data[0]):
     puts = data[0][k]
@@ -217,6 +271,8 @@ def main():
     iron_table_print(data)
   elif opts.strategy == 'strangle':
     strangle_table_print(data)
+  elif opts.strategy == 'short-butterfly':
+    short_bufferfly_print(data)
   else:
     all_strikes_print(data)
   

@@ -1,4 +1,44 @@
+"""
+  define various utility functions
+"""
 import datetime
+import random
+
+
+def binary_search(data, target, start, end, f=lambda x: x):
+  """ return index i in data that is bigger than target """
+  if start > end or start < 0 or end >= len(data):
+    return None
+  if f(data[start]) > target:
+    return start
+  if f(data[end]) <= target:
+    return None
+  if start == end:
+    return start
+  mid = (end + start) / 2
+  if f(data[mid]) > target:
+    if f(data[mid-1]) <= target:
+      return mid
+    return binary_search(data, target, start, mid-1, f)
+  if f(data[mid]) == target:
+    return mid + 1
+  return binary_search(data, target, mid+1, end, f)
+
+
+def test_binary_search():
+  """ test binary_search """
+  arr = sorted(random.sample(range(1, 100), 80))
+  tests = random.sample(range(1, 100), 20) + [-2, -1, 0, 99, 100, 101]
+  for x in tests:
+    found = False
+    for i in range(len(arr)):
+      if arr[i] > x:
+        assert i == binary_search(arr, x, 0, len(arr)-1)
+        found = True
+        break
+    if not found:
+      assert binary_search(arr, x, 0, len(arr)-1) is None
+
 
 def isStrUnicode(a):
   """ if input is string or unicode """

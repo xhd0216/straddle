@@ -3,10 +3,10 @@ from dateutil.relativedelta import relativedelta
 import logging
 import math
 import os
-import random
 from subprocess import Popen, PIPE
 
 from straddle.strategy import create_strike
+from util.misc import binary_search
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -139,41 +139,6 @@ def get_hist_quote(symbol, start='2017-01-01', force=False):
   return ret
 
 
-def binary_search(data, target, start, end, f=lambda x: x):
-  """ return index i in data that is bigger than target """
-  if start > end or start < 0 or end >= len(data):
-    return -1
-  if f(data[start]) > target:
-    return start
-  if f(data[end]) <= target:
-    return -1
-  if start == end:
-    return start
-  mid = (end + start) / 2
-  if f(data[mid]) > target:
-    if f(data[mid-1]) <= target:
-      return mid
-    return binary_search(data, target, start, mid-1, f)
-  if f(data[mid]) == target:
-    return mid + 1
-  return binary_search(data, target, mid+1, end, f)
-
-
-def test_binary_search():
-  """ test binary_search """
-  arr = sorted(random.sample(range(1, 100), 80))
-  tests = random.sample(range(1, 100), 20) + [-2, -1, 0, 99, 100, 101]
-  for x in tests:
-    found = False
-    for i in range(len(arr)):
-      if arr[i] > x:
-        assert i == binary_search(arr, x, 0, len(arr)-1)
-        found = True
-        break
-    if not found:
-      assert -1 == binary_search(arr, x, 0, len(arr)-1)
-
-
 def calculate_vol(data):
   u = sum(data) / len(data)
   t = [(x-u)**2 for x in data]
@@ -196,7 +161,7 @@ def get_realized_vol(symbol):
   for p in periods:
     # find the start date index
     index = binary_search(data, p, 0, len(data)-1, f=lambda x: x[0])
-    if index == -1:
+    if index is None:
       logging.error('cannot find start date %s in data', p)
       continue
     vol1 = [x[5] for x in data[index+1:]]
