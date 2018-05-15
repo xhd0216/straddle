@@ -4,11 +4,17 @@
 import argparse
 import datetime
 import logging
+import sqlalchemy
+from sqlalchemy import Table, Column, Integer, Float, String, Date, DateTime, Bool, MetaData
 import sys
 
 from mysql_connect import create_mysql_session
 from straddle.strategy import Strike
 from util.logger import set_logger
+
+
+
+
 
 
 TABLE_NAME = 'test_options'
@@ -22,6 +28,24 @@ COLUMN_TYPES = ['underlying',
                 'bid',
                 'last',
                 'open_int']
+
+
+def create_test_options_table(engine, test_table_name=TABLE_NAME):
+  """ sqlalchemy create table """
+  metadata = MetaData()
+  share_table = Table(test_table_name, metadata,
+                      Column('underlying', String(length=10), nullable=False),
+                      Column('strike', Float, nullable=False),
+                      Column('expiration', Date, nullable=False),
+                      Column('price', Float),
+                      Column('bid', Float),
+                      Column('ask', Float),
+                      Column('last', Float),
+                      Column('open_int', Integer),
+                      Column('query_time', DateTime),
+                      Column('is_call', Bool))
+  metadata.create_all(engine)
+
 
 def obj_convert(o):
   """ convert objects to sql str """
