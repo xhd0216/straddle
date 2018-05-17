@@ -14,7 +14,8 @@ def test_objects_to_json():
   assert not t.isValid()
   js = t.__json__()
   k = json.loads(js)
-  assert len(k.keys()) == 0 
+  print js
+  assert len(k.keys()) == 1
   t.addKey('int_field', 1)
   t.addKey('float_field', 1.0)
   k = json.loads(t.__json__())

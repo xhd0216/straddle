@@ -29,7 +29,7 @@ def test_parseStrike():
   assert r.isCall()
   print r.getExpirationStr()
   assert r.getExpirationStr() == date(2045, 12, 11).strftime(default_date_format) 
-  assert r.getExpirationDate().date() == date(2045, 12, 11)
+  assert r.getExpirationDate() == date(2045, 12, 11)
   validate_strike(r)
 
 json2 = '{"strike": 132.5, "underlying": "AAPL", "is_call": true, "expiration": "may 11, 2045", "price": 128.35, "position":200}'
