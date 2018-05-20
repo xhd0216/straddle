@@ -5,7 +5,7 @@ import argparse
 import datetime
 import logging
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, Float, String, Date, DateTime, Bool, MetaData
+from sqlalchemy import *
 import sys
 
 from mysql_connect import create_mysql_session
@@ -43,7 +43,7 @@ def create_test_options_table(engine, test_table_name=TABLE_NAME):
                       Column('last', Float),
                       Column('open_int', Integer),
                       Column('query_time', DateTime),
-                      Column('is_call', Bool, nullable=False))
+                      Column('is_call', Boolean, nullable=False))
   metadata.create_all(engine)
 
 
