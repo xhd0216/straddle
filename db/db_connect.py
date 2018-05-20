@@ -43,7 +43,7 @@ def create_test_options_table(engine, test_table_name=TABLE_NAME):
                       Column('last', Float),
                       Column('open_int', Integer),
                       Column('query_time', DateTime),
-                      Column('is_call', Bool))
+                      Column('is_call', Bool, nullable=False))
   metadata.create_all(engine)
 
 
