@@ -120,7 +120,7 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
       b, a = fix_instance(res[k], strike_auxiliary[k])
       if not b:
         logging.error("auxiliary field %s error %s", k, res)
-        return None
+        continue
       res[k] = a
   # 6, return
   return Strike(res)

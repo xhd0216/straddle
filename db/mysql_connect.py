@@ -3,43 +3,16 @@ import os
 import sqlalchemy
 from sqlalchemy import orm
 
-def get_mysql_connect(cnf):
-  with open(cnf, 'r') as cobj:
-    r = cobj.readlines()
-  client_flag = False
-  res = {}
-  for line in r:
-    line = line.strip()
-    if line == '':
-      continue
-    if line[0] == '#':
-      # comments
-      continue
-    if '[client]' in line:
-      client_flag = True
-    elif '=' not in line:
-      if client_flag:
-        break
-    else:
-      a = line.split('=')
-      res[a[0].strip()] = a[1].strip()
-  if 'host' not in res:
-    logging.warning('missing host in cnf file, use localhost')
-    res['host'] = 'localhost'
-  if 'port' not in res:
-    logging.info('missing port in cnf file, use 3306')
-    res['port'] = 3306
-  if 'database' not in res:
-    logging.warning('missing database in cnf file')
-    res['database'] = ''
-  if 'user' not in res:
-    logging.warning('missing user in cnf file')
-    return 'mysql://%(host)s:%(port)s/%(database)s' % res
-  if 'password' not in res:
-    logging.warning('missing password in cnf file')
-    return None
-  return 'mysql://%(user)s:%(password)s@%(host)s:%(port)s/%(database)s' % res
+from db.sa_api import get_db_link
 
+
+def get_mysql_connect(cnf):
+  """ obsoleted """
+  if cnf is None:
+    logging.error('cnf file missing')
+    return None
+  return get_db_link(cnf)
+  
 
 class mysqlSession():
   def __init__(self, url):
