@@ -1,6 +1,7 @@
 """
-  DB APId
+  DB APIs
 """
+import logging
 import sqlalchemy as sa
 import os
 
@@ -72,17 +73,18 @@ def create_options_table(test_table_name=dbc.TABLE_NAME):
   """ sqlalchemy create table """
   global options_table
 
-  tab = sa.Table(test_table_name, meta,
-                 sa.Column('underlying', sa.String(length=10), nullable=False),
-                 sa.Column('strike', sa.Float, nullable=False),
-                 sa.Column('expiration', sa.Date, nullable=False),
-                 sa.Column('price', sa.Float),
-                 sa.Column('bid', sa.Float),
-                 sa.Column('ask', sa.Float),
-                 sa.Column('last', sa.Float),
-                 sa.Column('open_int', sa.Integer),
-                 sa.Column('query_time', sa.DateTime),
-                 sa.Column('is_call', sa.Boolean, nullable=False))
+  tab = sa.Table(
+    test_table_name, meta,
+    sa.Column('underlying', sa.String(length=10), nullable=False),
+    sa.Column('strike', sa.Float, nullable=False),
+    sa.Column('expiration', sa.Date, nullable=False),
+    sa.Column('price', sa.Float),
+    sa.Column('bid', sa.Float),
+    sa.Column('ask', sa.Float),
+    sa.Column('last', sa.Float),
+    sa.Column('open_int', sa.Integer),
+    sa.Column('query_time', sa.DateTime),
+    sa.Column('is_call', sa.Boolean, nullable=False))
   meta.create_all(engine)
   options_table = tab
 

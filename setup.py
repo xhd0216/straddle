@@ -18,6 +18,7 @@ setup(
     },
     install_requires=[
       'argparse',
+      'frozendict',
       'MySQL-python',
       'python-dateutil',
       'sqlalchemy',
