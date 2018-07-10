@@ -36,7 +36,8 @@ def test_basic_sqlalchemyl():
 
 def test_options_table():
   engine = api.create_sql_engine()
-  table = api.create_options_table(engine, 'test_option_table')
+  api.create_options_table(engine, 'test_option_table')
+  table = api.get_options_table()
 
   data = {
     'underlying': 'spy',

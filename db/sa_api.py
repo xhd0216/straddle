@@ -5,13 +5,13 @@ import logging
 import sqlalchemy as sa
 import os
 
-import db.db_connect as dbc
 import straddle.strategy as stg
 
 # global variables
+OPTIONS_TABLE_NAME='test_options'
 META = sa.MetaData()
 OPTIONS_TABLE = sa.Table(
-  test_table_name, meta,
+  OPTIONS_TABLE_NAME, META,
   sa.Column('underlying', sa.String(length=10), nullable=False),
   sa.Column('strike', sa.Float, nullable=False),
   sa.Column('expiration', sa.Date, nullable=False),
@@ -22,6 +22,10 @@ OPTIONS_TABLE = sa.Table(
   sa.Column('open_int', sa.Integer),
   sa.Column('query_time', sa.DateTime),
   sa.Column('is_call', sa.Boolean, nullable=False))
+
+ALL_TABLE_SCHEMAS = {
+  OPTIONS_TABLE_NAME: OPTIONS_TABLE
+}
 
 
 def get_db_link(cnf):
@@ -81,10 +85,20 @@ def create_sql_engine(dbcnf=None):
     return sa.create_engine(get_db_link(dbcnf))
 
 
-def create_options_table(engine, test_table_name=dbc.TABLE_NAME):
+def create_options_table(engine, test_table_name=OPTIONS_TABLE_NAME):
   """ sqlalchemy create table """
-  meta.create_all(engine)
-  return OPTIONS_TABLE
+  META.create_all(engine)
+
+
+def get_options_table():
+  """ get schema of options table """
+  return get_table_schema(OPTIONS_TABLE_NAME)
+
+
+def get_table_schema(table_name):
+  """ get schema by name """
+  return ALL_TABLE_SCHEMAS[table_name]
+
 
 #def insert_strike(strk):
 #  """ insert strike to options table """
