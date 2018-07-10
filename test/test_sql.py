@@ -1,18 +1,30 @@
 import datetime
+import os
 import sqlalchemy as sa
 
-import db.db_connect as dbc
 import db.sa_api as api
-import straddle.strategy as stg
 
-engine = sa.create_engine('sqlite://')
-meta = sa.MetaData(bind=engine)
-test_table = sa.Table('test', meta,
-  sa.Column('id', sa.Integer, primary_key=True))
 
-meta.create_all(engine)
+def test_empty_db_engine():
+  """ test create_sql_engine with db file """
+  db_path = os.path.abspath('./empty.db')
+  engine = api.create_sql_engine(db_path)
+  table = sa.Table('test_table', sa.MetaData(),
+    sa.Column('id', sa.Integer))
+  query = table.select()
+  res = engine.execute(query).fetchall()
+  assert len(res) == 1
+  assert res[0]['id'] == 10
+
 
 def test_basic_sqlalchemyl():
+  engine = sa.create_engine('sqlite://')
+  meta = sa.MetaData(bind=engine)
+  test_table = sa.Table('test', meta,
+    sa.Column('id', sa.Integer, primary_key=True))
+
+  meta.create_all(engine)
+
   ins = test_table.insert().values({'id':100})
   engine.execute(ins)
 
@@ -23,14 +35,28 @@ def test_basic_sqlalchemyl():
 
 
 def test_options_table():
-  api.create_sql_engine()
-  api.create_options_table()
+  engine = api.create_sql_engine()
+  table = api.create_options_table(engine, 'test_option_table')
 
-  strk = stg.create_strike({'ask':1.50}, 'spy', 267, datetime.date(2018, 4, 20), True, 266.23)
+  data = {
+    'underlying': 'spy',
+    'strike': 119.0,
+    'expiration': datetime.date(2018, 8, 11),
+    'price': 117,
+    'bid': 3.0,
+    'ask': 3.5,
+    'last': 3.10,
+    'open_int': 215,
+    'query_time': datetime.datetime(2018, 5, 18, 10, 12, 0),
+    'is_call': False
+  }
 
-  api.insert_strike(strk)
-  res = api.query_options_table()
+  ins = table.insert().values(data)
+  engine.execute(ins)
+
+  query = table.select()
+  res = engine.execute(query).fetchall()
 
   assert len(res) == 1
-  for key in dbc.COLUMN_TYPES:
-    assert res[0].getKey(key) == strk.getKey(key)
+  for key in data.keys():
+    assert res[0][key] == data.get(key)
