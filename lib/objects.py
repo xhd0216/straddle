@@ -72,13 +72,15 @@ class objects():
         return False
       b = self.__validate__(k, self.fields[k])
       if not b:
-        logging.error("wrong type: key %s, value %s, type %s", k, str(self.data[k]), str(self.fields[k]))
+        logging.error("wrong type: key %s, value %s, type %s",
+                      k, str(self.data[k]), str(self.fields[k]))
         return False
 
     for k in self.auxiliary.keys():
       b = self.__validate__(k, self.auxiliary[k], required=False)
       if not b:
-        logging.error("wrong type: key %s, value %s, type %s", k, str(self.data[k]), str(self.auxiliary[k]))
+        logging.error("wrong type: key %s, value %s, type %s",
+                      k, str(self.data[k]), str(self.auxiliary[k]))
         return False
     return True
 

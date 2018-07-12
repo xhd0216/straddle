@@ -92,7 +92,7 @@ class Strike(objects):
 
 def create_strike(misc, underlying=None, strike=None, expiration=None,
                   is_call=None, price=None, query_time=None):
-  """ create a strike """
+  """ create a strike from a dict """
   # create dictionary
   # 1, get all inputs (underlying, ...)
   local = locals()
@@ -111,7 +111,8 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
     if not isinstance(res[k], strike_field[k]):
       b, a = fix_instance(res[k], strike_field[k])
       if not b:
-        logging.error("required field %s error %s, type %s", k, res[k], type(res[k]))
+        logging.error("required field %s error %s, type %s",
+                      k, res[k], type(res[k]))
         return None
       res[k] = a
   # 5, check auxiliary fields
@@ -126,7 +127,42 @@ def create_strike(misc, underlying=None, strike=None, expiration=None,
   return Strike(res)
 
 
+def create_strike_from_namedtuple(o):
+  """ create strike from a namedtuple """
+  ## note: don't use namedtuple._asdict or .__dict__ to convert.
+  ## they are only supported in some python versions.
+  res = {}
+  for k in strike_field:
+    if not hasattr(o, k):
+      logging.error('missing required field %s', k)
+      return None
+    v = getattr(o, k)
+    if not instance(v, strike_field[k]):
+      b, a = fix_instance(res[k], strike_field[k])
+      if not b:
+        logging.error("reuiqred field %s error %s, type %s",
+                      k, res[k], type(res[k]))
+        return None
+      res[k] = a
+    else:
+      res[k] = v
+
+  for k in strike_auxiliary:
+    if hasattr(o, k):
+      v = getattr(o, k)
+      if not isinstance(v, strike_auxiliary[k]):
+        b, a = fix_instance(v, strike_auxiliary[k])
+        if not b:
+          logging.error("auxiliary field %s error %s", k, v)
+          continue
+        res[k] = a
+      else:
+        res[k] = v
+  return Strike(res)
+
+
 def parse_strike(s):
+  """ parse json to strike """
   a = json.loads(s)
   assert a
   return create_strike(a)
