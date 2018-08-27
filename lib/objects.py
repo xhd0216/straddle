@@ -29,10 +29,22 @@ def obj_convert(o):
 
 class objects():
   """ base objects class """
+  fields = {}
+  auxiliary = {}
   def __init__(self):
     self.fields = dict()     # required fields, (key, type) must match
     self.auxiliary = dict()  # non-required fields, (key, type) must match
     self.data = dict()
+
+  @classmethod
+  def get_fields(self):
+    """ get class fields """
+    return self.fields
+
+  @classmethod
+  def get_auxiliary(self):
+    """ get auxiliary fields """
+    return self.auxiliary
 
   def __json__(self, indent=4, sort_keys=True):
     """ dump data to json file """
