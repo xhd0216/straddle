@@ -1,0 +1,29 @@
+library('tseries')
+
+dat <- get.hist.quote(instrument='spy', start='2017-01-01')
+
+df <- data.frame(dat)
+
+dates <- row.names(df)
+
+weeks <- cut(as.Date(dates), 'weeks')
+
+ret <- data.frame(matrix(ncol=4, nrow=0))
+colnames(ret) <- c('Open', 'High', 'Low', 'Close')
+
+wp <- function() {
+  dw <- data.frame(df, Weeks=weeks)
+  for (w in unique(weeks)) {
+    ss <- dw[dw$Weeks==w,]
+    print(w)
+    print(ss)
+    print(ss[1,]$Open)
+    print(max(ss$High))
+    print(min(ss$Low))
+    print(ss[nrow(ss),]$Close)
+    ret[w,] <<- c(ss[1,]$Open, max(ss$High), min(ss$Low), ss[nrow(ss),]$Close)
+  }
+}
+
+wp()
+print(ret)
