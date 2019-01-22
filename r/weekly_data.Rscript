@@ -34,10 +34,13 @@ download <- function(tik='spy', start='2017-01-01') {
   return(df)
 }
 
-corr <- function(s1, s2, start='2017-01-01') {
+corr <- function(s1, s2, start='2017-01-01', end='2099-12-31') {
   d1 <- download(s1, start)
   d2 <- download(s2, start)
-  r1 <- StockReturns(d1$Close)
-  r2 <- StockReturns(d2$Close)
+  c1 <- d1[row.names(d1) >= start & row.names(d1) <= end, ]$Close
+  c2 <- d2[row.names(d2) >= start & row.names(d2) <= end, ]$Close
+  r1 <- StockReturns(c1)
+  r2 <- StockReturns(c2)
   return(cor(r1, r2))
 }
+
