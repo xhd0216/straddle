@@ -1,29 +1,43 @@
 library('tseries')
 
-dat <- get.hist.quote(instrument='spy', start='2017-01-01')
-
-df <- data.frame(dat)
-
-dates <- row.names(df)
-
-weeks <- cut(as.Date(dates), 'weeks')
-
-ret <- data.frame(matrix(ncol=4, nrow=0))
-colnames(ret) <- c('Open', 'High', 'Low', 'Close')
-
-wp <- function() {
+wp <- function(df) {
+  dates <- row.names(df)
+  weeks <- cut(as.Date(dates), 'weeks')
   dw <- data.frame(df, Weeks=weeks)
+
+  ret <- data.frame(matrix(ncol=4, nrow=0))
+  colnames(ret) <- c('Open', 'High', 'Low', 'Close')
   for (w in unique(weeks)) {
     ss <- dw[dw$Weeks==w,]
-    print(w)
-    print(ss)
-    print(ss[1,]$Open)
-    print(max(ss$High))
-    print(min(ss$Low))
-    print(ss[nrow(ss),]$Close)
-    ret[w,] <<- c(ss[1,]$Open, max(ss$High), min(ss$Low), ss[nrow(ss),]$Close)
+    #print(w)
+    #print(ss)
+    #print(ss[1,]$Open)
+    #print(max(ss$High))
+    #print(min(ss$Low))
+    #print(ss[nrow(ss),]$Close)
+    ret[w,] <- c(ss[1,]$Open, max(ss$High), min(ss$Low), ss[nrow(ss),]$Close)
   }
+  write.csv(ret, file=paste0(tik, '_weekly.csv'))
+  return(ret)
 }
 
-wp()
-print(ret)
+StockReturns <- function(closes) {
+  return(diff(closes)/closes[-length(closes)])
+}
+
+download <- function(tik='spy', start='2017-01-01') {
+  dat <- get.hist.quote(instrument=tik, start=start)
+
+  df <- data.frame(dat)
+
+  write.csv(df, file=paste0(tik, '_data.csv'))
+  return(df)
+}
+
+corr <- function(s1, s2, start='2017-01-01') {
+  d1 <- download(s1, start)
+  d2 <- download(s2, start)
+  r1 <- StockReturns(d1$Close)
+  r2 <- StockReturns(d2$Close)
+  return(cor(r1, r2))
+}
