@@ -161,7 +161,7 @@ stock.loads <- function(
   return(all_closes)
 }
 
-stock.beta <- function(syms, benchmark.stock = 'spy', start.date = '2019-03-25', end.date = Sys.Date()) {
+stock.beta <- function(syms, benchmark.stock = 'spy', start.date = '2018-01-01', end.date = Sys.Date()) {
   syms = c(benchmark.stock, syms)
   all_closes = stock.loads(syms, start.date, end.date, cache = TRUE)
   co = stock.corr.helper(all_closes)
